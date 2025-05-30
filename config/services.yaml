@@ -1,0 +1,52 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    env(SOURCE_WIDTH): '8192'
+    env(SOURCE_HEIGHT): '4096'
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $tempDir: '/tmp'
+            $stylePath: '%kernel.project_dir%/style.json'
+            $mapTilerToken: '%env(MAP_TILER_TOKEN)%'
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    Brick\Geo\IO\GeoJSONReader: ~
+    Brick\Geo\IO\GeoJSONWriter: ~
+    Brick\Geo\Engine\GeometryEngine:
+        class: 'Brick\Geo\Engine\GEOSEngine'
+    HeyMoon\VectorTileDataProvider\Contract\GeometryCollectionFactoryInterface:
+        class: 'HeyMoon\VectorTileDataProvider\Factory\GeometryCollectionFactory'
+    HeyMoon\VectorTileDataProvider\Contract\SourceFactoryInterface:
+        class: 'HeyMoon\VectorTileDataProvider\Factory\SourceFactory'
+    HeyMoon\VectorTileDataProvider\Contract\ProjectionRegistryInterface:
+        class: 'HeyMoon\VectorTileDataProvider\Registry\BasicProjectionRegistry'
+    HeyMoon\VectorTileDataProvider\Contract\ExportFormatInterface:
+        class: 'HeyMoon\VectorTileDataProvider\Registry\ExportFormatRegistry'
+    HeyMoon\VectorTileDataProvider\Contract\SpatialServiceInterface:
+        class: 'HeyMoon\VectorTileDataProvider\Service\SpatialService'
+    HeyMoon\VectorTileDataProvider\Contract\GridServiceInterface:
+        class: 'HeyMoon\VectorTileDataProvider\Service\GridService'
+    HeyMoon\VectorTileDataProvider\Contract\TileServiceInterface:
+        class: 'HeyMoon\VectorTileDataProvider\Service\TileService'
+    App\Service\FootageService:
+        bind:
+            $url: 'https://clouds.matteason.co.uk/images/%env(SOURCE_WIDTH)%x%env(SOURCE_HEIGHT)%/clouds-alpha.png'
+            $width: '%env(int:SOURCE_WIDTH)%'
+            $height: '%env(int:SOURCE_HEIGHT)%'
+            $alphaThreshold: 220
+            $colorThreshold: 220

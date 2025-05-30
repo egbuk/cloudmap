@@ -1,0 +1,10 @@
+var
+vendor
+node_modules
+public/build
+supervisord.pid
+Makefile
+.editorconfig
+.idea
+.DS_Store
+.env.dev
