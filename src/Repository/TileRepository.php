@@ -13,6 +13,7 @@ use HeyMoon\VectorTileDataProvider\Entity\Feature as FeatureEntity;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use Vector_tile\Tile;
 
 readonly class TileRepository
@@ -39,8 +40,11 @@ readonly class TileRepository
      */
     public function get(TilePosition $position)
     {
-        return $this->cache->get($position, fn() => $position->getZoom() > CloudUpdateService::MAX_ZOOM ?
-            $this->getRaw($position) : null);
+        return $this->cache->get($position, function (ItemInterface $item) use ($position) {
+            $item->expiresAfter(300);
+            return $position->getZoom() > CloudUpdateService::MAX_ZOOM ?
+                $this->getRaw($position) : null;
+        });
     }
 
     /**
