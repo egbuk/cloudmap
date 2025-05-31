@@ -2,6 +2,14 @@
 
 namespace App\Repository;
 
+use App\Service\CloudUpdateService;
+use Brick\Geo\Exception\GeometryException;
+use Brick\Geo\IO\GeoJSON\FeatureCollection;
+use Brick\Geo\IO\GeoJSONReader;
+use Brick\Geo\IO\GeoJSONWriter;
+use HeyMoon\VectorTileDataProvider\Contract\SourceFactoryInterface;
+use HeyMoon\VectorTileDataProvider\Contract\TileServiceInterface;
+use HeyMoon\VectorTileDataProvider\Entity\Feature as FeatureEntity;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\Cache\CacheInterface;
@@ -10,7 +18,11 @@ use Vector_tile\Tile;
 readonly class TileRepository
 {
     public function __construct(
-        private CacheInterface $cache
+        private CacheInterface $cache,
+        private GeoJSONWriter $geoJSONWriter,
+        private GeoJSONReader $geoJSONReader,
+        private SourceFactoryInterface $sourceFactory,
+        private TileServiceInterface $tileService
     ) {}
 
     /**
@@ -27,6 +39,41 @@ readonly class TileRepository
      */
     public function get(TilePosition $position)
     {
-        return $this->cache->get($position, fn() => null);
+        return $this->cache->get($position, fn() => $position->getZoom() > CloudUpdateService::MAX_ZOOM ?
+            $this->getRaw($position) : null);
+    }
+
+    /**
+     * @param TilePosition $position
+     * @param FeatureEntity[] $clouds
+     * @return TilePosition|mixed
+     * @throws InvalidArgumentException
+     */
+    public function storeRaw(TilePosition $position, array $clouds): mixed
+    {
+        $key = "raw$position";
+        $this->cache->delete($key);
+        return $this->cache->get($key, fn() => gzencode($this->geoJSONWriter->write(new FeatureCollection(
+            ...array_map(fn(FeatureEntity $feature) => $feature->asGeoJSONFeature(), $clouds)))));
+    }
+
+    /**
+     * @throws GeometryException
+     * @throws InvalidArgumentException
+     */
+    private function getRaw(TilePosition $position): ?string
+    {
+        $scale = pow(2, $position->getZoom() - CloudUpdateService::MAX_ZOOM);
+        $data = $this->cache->get('raw'.TilePosition::xyz(
+                (int)floor($position->getColumn() / $scale),
+                (int)floor($position->getRow() / $scale),
+                CloudUpdateService::MAX_ZOOM
+            ), fn() => null);
+        if (!$data) {
+            return null;
+        }
+        $source = $this->sourceFactory->create();
+        $source->addCollection('clouds', $this->geoJSONReader->read(gzdecode($data)));
+        return gzencode($this->tileService->getTileMVT($source->getFeatures(), $position)->serializeToString());
     }
 }

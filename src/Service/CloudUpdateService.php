@@ -17,7 +17,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 
 readonly class CloudUpdateService
 {
-    protected const MAX_ZOOM = 14;
+    public const MAX_ZOOM = 8;
 
     public function __construct(
         private FootageService $footageService,
@@ -43,11 +43,15 @@ readonly class CloudUpdateService
         $this->footageService->clear($footage);
         $source = $this->sourceFactory->create();
         $source->addCollection('clouds', $clouds);
-        $progressBar?->setMaxSteps(static::MAX_ZOOM);
-        foreach (range(0, 14) as $zoom) {
+        $progressBar?->setMaxSteps(static::MAX_ZOOM + 1);
+        foreach (range(0, static::MAX_ZOOM) as $zoom) {
             $grid = $this->gridService->getGrid($source, $zoom);
             $grid->iterate(fn(TilePosition $position, array $clouds) => $this->tileRepository->store(
                 $position, $this->tileService->getTileMVT($clouds, $position)));
+            if ($zoom === static::MAX_ZOOM) {
+                $grid->iterate(fn(TilePosition $position, array $clouds) => $this->tileRepository->storeRaw(
+                    $position, $clouds));
+            }
             $progressBar?->advance();
         }
     }

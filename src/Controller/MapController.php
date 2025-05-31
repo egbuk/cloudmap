@@ -71,7 +71,7 @@ class MapController extends AbstractController
                         "{$request->getSchemeAndHttpHost()}/clouds?x={x}&y={y}&z={z}"
                     ],
                     'minZoom' => 0,
-                    'maxZoom' => 14
+                    'maxZoom' => 22
                 ]
             ]
         ]));
