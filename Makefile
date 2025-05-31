@@ -3,7 +3,7 @@ SOURCE_HEIGHT := $(shell printenv SOURCE_HEIGHT || echo '1024')
 SOURCE_WIDTH := $(shell printenv SOURCE_WIDTH || echo '2048')
 
 build:
-	docker buildx build --platform linux/amd64 -t heymoon/cloudmap .
+	docker build -t heymoon/cloudmap .
 
 run: build
 	docker run -p 8123:80 -e MAP_TILER_TOKEN=$(MAP_TILER_TOKEN) \
