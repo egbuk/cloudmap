@@ -41,7 +41,7 @@ readonly class TileRepository
     public function get(TilePosition $position)
     {
         return $this->cache->get($position, function (ItemInterface $item) use ($position) {
-            $item->expiresAfter(300);
+            $item->expiresAfter(60);
             return $position->getZoom() > CloudUpdateService::MAX_ZOOM ?
                 $this->getRaw($position) : null;
         });

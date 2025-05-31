@@ -20,7 +20,7 @@ use ImagickPixelException;
 
 readonly class CloudSearchService
 {
-    protected const TOLERANCE = 0.1;
+    protected const TOLERANCE = 0.5;
 
     public function __construct(
         private SpatialServiceInterface $spatialService,
