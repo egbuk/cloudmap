@@ -18,6 +18,7 @@ readonly class TileRepository
      */
     public function store(TilePosition $position, Tile $tile)
     {
+        $this->cache->delete($position);
         return $this->cache->get($position, fn() => gzencode($tile->serializeToString()));
     }
 
