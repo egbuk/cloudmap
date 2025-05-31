@@ -6,6 +6,8 @@
 parameters:
     env(SOURCE_WIDTH): '8192'
     env(SOURCE_HEIGHT): '4096'
+    env(ALPHA_THRESHOLD): '220'
+    env(COLOR_THRESHOLD): '220'
 
 services:
     # default configuration for services in *this* file
@@ -48,5 +50,5 @@ services:
             $url: 'https://clouds.matteason.co.uk/images/%env(SOURCE_WIDTH)%x%env(SOURCE_HEIGHT)%/clouds-alpha.png'
             $width: '%env(int:SOURCE_WIDTH)%'
             $height: '%env(int:SOURCE_HEIGHT)%'
-            $alphaThreshold: 220
-            $colorThreshold: 220
+            $alphaThreshold: '%env(int:ALPHA_THRESHOLD)%'
+            $colorThreshold: '%env(int:COLOR_THRESHOLD)%'
