@@ -1,6 +1,8 @@
 # About
 Live vector cloud map based on [matteason/live-cloud-maps](https://github.com/matteason/live-cloud-maps)
 
+![Preview](screenshot.png)
+
 # Environment variables
 * **MAP_TILER_TOKEN** - token from [MapTiler Cloud](https://cloud.maptiler.com/account/keys/) (for base layer)
 * **SOURCE_WIDTH** - `8192`/`4096`/`2048`/`1024`
