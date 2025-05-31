@@ -8,3 +8,4 @@ Makefile
 .idea
 .DS_Store
 .env.dev
+screenshot.png
