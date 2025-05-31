@@ -20,6 +20,6 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 ADD . /var/www
 COPY --from=encore /build/public/build /var/www/public/build
-RUN composer install && \
+RUN composer install && crontab /var/www/docker/crontab && \
     ln -s /var/www/bin/console /usr/bin/symfony && mkdir -p /var/run/php
 CMD ["supervisord", "-c", "/etc/supervisord.conf", "--nodaemon"]
