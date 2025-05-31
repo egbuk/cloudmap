@@ -8,7 +8,7 @@ build:
 run: build
 	docker run -p 8123:80 -e MAP_TILER_TOKEN=$(MAP_TILER_TOKEN) \
 		-e SOURCE_HEIGHT=$(SOURCE_HEIGHT) -e SOURCE_WIDTH=$(SOURCE_WIDTH) \
-		-e APP_SECRET=$(APP_SECRET) -e APP_ENV=prod -v ./:/var/www --name cloudmap -d docker.io/heymoon/cloudmap
+		-e APP_SECRET=$(APP_SECRET) --name cloudmap -d docker.io/heymoon/cloudmap
 
 clear:
 	docker stop cloudmap || true
