@@ -14,8 +14,6 @@ map.addControl(new maplibregl.AttributionControl(), 'top-left');
 const rewind = document.getElementById('rewind');
 rewind.value = 0;
 const label = document.querySelector('#time label');
-label.innerText = new Date(rewind.dataset.time*1000)
-    .toTimeString().split(':').slice(0, 2).join(':');
 const oninput = () => {
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
@@ -24,6 +22,7 @@ const oninput = () => {
         map.setFilter(layer, ['==', 'time', `${time.getUTCHours()}:00`]);
     })
 };
+oninput();
 rewind.oninput = oninput;
 const nextHour = () => {
     setTimeout(nextHour,3600000);

@@ -110,8 +110,9 @@ readonly class CloudSearchService
                 $clouds[] = $cloud;
             }
         }
-        return new FeatureCollection(...array_map(fn(Geometry $cloud) =>
-            new Feature($cloud, (object)$properties), $clouds));
+        $start = time();
+        return new FeatureCollection(...array_map(fn(Geometry $cloud, int $key) =>
+            new Feature($cloud, (object)array_merge($properties, ['id' => $key + $start])), $clouds, array_keys($clouds)));
     }
 
     protected function getPoint(int $x, int $y, Footage $footage): Point
