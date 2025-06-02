@@ -45,18 +45,7 @@ class MapController extends AbstractController
                            #[MapQueryParameter] int $y,
                            #[MapQueryParameter] int $z): Response
     {
-        return $this->cloudsByTime($this->tileRepository->getCurrentTime(), $x, $y, $z);
-    }
-
-    /**
-     * @throws InvalidArgumentException
-     */
-    #[Route('/clouds/{time}', methods: ['GET'])]
-    public function cloudsByTime(string                   $time, #[MapQueryParameter] int $x,
-                                 #[MapQueryParameter] int $y,
-                                 #[MapQueryParameter] int $z): Response
-    {
-        return new Response($this->tileRepository->get(TilePosition::xyzFlip($x, $y, $z), $time), 200, [
+        return new Response($this->tileRepository->get(TilePosition::xyzFlip($x, $y, $z)), 200, [
             'Content-Type' => 'application/x-protobuf',
             'Content-Encoding' => 'gzip',
             'Access-Control-Allow-Origin' => '*'

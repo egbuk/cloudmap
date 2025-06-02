@@ -20,17 +20,20 @@ const oninput = () => {
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
-    const clouds = map.getSource('clouds');
-    clouds.setTiles(clouds.tiles.map((tile) => {
-        const url = new URL(tile);
-        url.pathname = `clouds/${time.getUTCHours()}:00`;
-        return url.toString();
-    }));
+    ['cloud', 'cloud_edge'].forEach((layer) => {
+        map.setFilter(layer, ['==', 'time', `${time.getUTCHours()}:00`]);
+    })
 };
 rewind.oninput = oninput;
 const nextHour = () => {
     setTimeout(nextHour,3600000);
     rewind.dataset.time = (parseInt(rewind.dataset.time)+3600).toString();
+    const clouds = map.getSource('clouds');
+    clouds.setTiles(clouds.tiles.map((tile) => {
+        const url = new URL(tile);
+        url.searchParams.set('time', new Date().getTime());
+        return url.toString();
+    }));
     oninput();
 };
 setTimeout(nextHour,(rewind.dataset.time*1000+3600000)-new Date().getTime());

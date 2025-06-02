@@ -29,14 +29,15 @@ readonly class CloudSearchService
 
     /**
      * @param Footage $footage
+     * @param array $properties
      * @return FeatureCollection
      * @throws CoordinateSystemException
+     * @throws GeometryEngineException
      * @throws ImagickException
      * @throws ImagickPixelException
      * @throws InvalidGeometryException
-     * @throws GeometryEngineException
      */
-    public function process(Footage $footage): FeatureCollection
+    public function process(Footage $footage, array $properties): FeatureCollection
     {
         $clouds = [];
         foreach (range(1, $footage->getWidth()) as $x) {
@@ -109,7 +110,8 @@ readonly class CloudSearchService
                 $clouds[] = $cloud;
             }
         }
-        return new FeatureCollection(...array_map(fn(Geometry $cloud) => new Feature($cloud), $clouds));
+        return new FeatureCollection(...array_map(fn(Geometry $cloud) =>
+            new Feature($cloud, (object)$properties), $clouds));
     }
 
     protected function getPoint(int $x, int $y, Footage $footage): Point

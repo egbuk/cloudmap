@@ -7,6 +7,8 @@ use Brick\Geo\Exception\GeometryException;
 use Brick\Geo\IO\GeoJSON\FeatureCollection;
 use Brick\Geo\IO\GeoJSONReader;
 use Brick\Geo\IO\GeoJSONWriter;
+use Exception;
+use HeyMoon\VectorTileDataProvider\Contract\LayerInterface;
 use HeyMoon\VectorTileDataProvider\Contract\SourceFactoryInterface;
 use HeyMoon\VectorTileDataProvider\Contract\TileServiceInterface;
 use HeyMoon\VectorTileDataProvider\Entity\Feature as FeatureEntity;
@@ -43,16 +45,31 @@ readonly class TileRepository
     /**
      * @throws InvalidArgumentException
      */
-    public function get(TilePosition $position, string $time)
+    public function get(TilePosition $position)
     {
-        return $this->cache->get($this->getKey($position, $time),
-            function (ItemInterface $item) use ($position, $time) {
+        return $this->cache->get($this->getKey($position),
+            function (ItemInterface $item) use ($position) {
             if ($position->getZoom() <= CloudUpdateService::MAX_ZOOM) {
                 return null;
             }
             $item->expiresAfter(60);
-            return $this->getRaw($position, $time);
+            return $this->getRaw($position);
         });
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     * @throws Exception
+     */
+    public function getTile(TilePosition $position): ?Tile
+    {
+        $result = $this->cache->get($this->getKey($position), fn() => null);
+        if (!$result) {
+            return null;
+        }
+        $tile = new Tile();
+        $tile->mergeFromString(gzdecode($result));
+        return $tile;
     }
 
     /**
@@ -76,31 +93,40 @@ readonly class TileRepository
      * @throws GeometryException
      * @throws InvalidArgumentException
      */
-    private function getRaw(TilePosition $position, string $time): ?string
+    public function getRawLayer(TilePosition $position, string $name = 'clouds'): ?LayerInterface
     {
         $scale = pow(2, $position->getZoom() - CloudUpdateService::MAX_ZOOM);
         $data = $this->cache->get('raw'.$this->getKey(TilePosition::xyz(
                 (int)floor($position->getColumn() / $scale),
                 (int)floor($position->getRow() / $scale),
                 CloudUpdateService::MAX_ZOOM
-            ), $time), fn() => null);
+            )), fn() => null);
         if (!$data) {
             return null;
         }
         $source = $this->sourceFactory->create();
-        $source->addCollection('clouds', $this->geoJSONReader->read(gzdecode($data)));
-        return gzencode($this->tileService->getTileMVT($source->getFeatures(), $position)->serializeToString());
+        $source->addCollection($name, $this->geoJSONReader->read(gzdecode($data)));
+        return $source->getLayer($name);
     }
 
-    public function getCurrentTime(): string
+    /**
+     * @throws GeometryException
+     * @throws InvalidArgumentException
+     */
+    private function getRaw(TilePosition $position): ?string
     {
-        return date('H:00');
+        return gzencode($this->tileService->getTileMVT(
+            $this->getRawLayer($position)->getFeatures(), $position
+        )->serializeToString());
     }
 
-    private function getKey(TilePosition $position, ?string $time = null): string
+    public function getCurrentTime(?int $advance = null): string
     {
-        return md5(($time ?? date('H:0',
-                time()+60 // not defined only on update on 59th minute
-            )).$position);
+        return date('H:00', $advance ? time()+60*$advance : null);
+    }
+
+    private function getKey(TilePosition $position): string
+    {
+        return md5($position);
     }
 }
