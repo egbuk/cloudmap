@@ -65,8 +65,11 @@ readonly class TileRepository
     {
         $key = "raw{$this->getKey($position)}";
         $this->cache->delete($key);
-        return $this->cache->get($key, fn() => gzencode($this->geoJSONWriter->write(new FeatureCollection(
-            ...array_map(fn(FeatureEntity $feature) => $feature->asGeoJSONFeature(), $clouds)))));
+        return $this->cache->get($key, function(ItemInterface $item) use ($clouds) {
+            $item->expiresAfter(86400);
+            gzencode($this->geoJSONWriter->write(new FeatureCollection(
+                ...array_map(fn(FeatureEntity $feature) => $feature->asGeoJSONFeature(), $clouds))));
+        });
     }
 
     /**
