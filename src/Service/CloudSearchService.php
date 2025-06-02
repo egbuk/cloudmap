@@ -42,8 +42,8 @@ readonly class CloudSearchService
         $clouds = [];
         foreach (range(1, $footage->getWidth()) as $x) {
             /** WebMercator from 5 to 185 degrees */
-            foreach (range($footage->getHeight() / 180 * 5, $footage->getHeight() -
-                ($footage->getHeight() / 180 * 5)) as $y) {
+            foreach (range((int)($footage->getHeight() / 180 * 5), (int)($footage->getHeight() -
+                ($footage->getHeight() / 180 * 5))) as $y) {
                 if ($footage->hasCloud($x, $y)) {
                     $clouds[$x][$y] = true;
                 }
