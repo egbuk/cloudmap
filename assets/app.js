@@ -31,7 +31,7 @@ const nextHour = () => {
     const clouds = map.getSource('clouds');
     clouds.setTiles(clouds.tiles.map((tile) => {
         const url = new URL(tile);
-        url.searchParams.set('time', new Date().getTime());
+        url.searchParams.set('time', new Date().getTime().toString());
         return url.toString();
     }));
     oninput();
