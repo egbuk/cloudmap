@@ -9,7 +9,7 @@
         "ext-iconv": "*",
         "ext-imagick": "*",
         "ext-zlib": "*",
-        "heymoon/vector-tile-data-provider": "1.1.1",
+        "heymoon/vector-tile-data-provider": "1.1.2",
         "symfony/cache": "7.3.*",
         "symfony/console": "7.3.*",
         "symfony/dotenv": "7.3.*",
