@@ -55,7 +55,8 @@ class MapController extends AbstractController
     #[Route('/style', methods: ['GET'])]
     public function style(Request $request): JsonResponse
     {
-        return $this->json(array_merge(json_decode($this->filesystem->readFile($this->stylePath), true), [
+        $filter = ['==', 'time', $this->tileRepository->getCurrentTime()];
+        return $this->json(array_merge_recursive(json_decode($this->filesystem->readFile($this->stylePath), true), [
             'glyphs' => "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=$this->mapTilerToken",
             'sources' => [
                 'contours' => [
@@ -82,6 +83,28 @@ class MapController extends AbstractController
                     'minZoom' => 0,
                     'maxZoom' => 22,
                     'attribution' => 'Contains modified <a href="https://www.eumetsat.int" target="_blank">EUMETSAT</a> data '.date('Y')
+                ]
+            ],
+            'layers' => [
+                [
+                    'id' => 'cloud',
+                    'type' => 'fill',
+                    'source' => 'clouds',
+                    'source-layer' => 'clouds',
+                    'paint' => [
+                        'fill-color' => 'rgba(255, 255, 255, 0.5)'
+                    ],
+                    'filter' => $filter
+                ],
+                [
+                    'id' => 'cloud_edge',
+                    'type' => 'line',
+                    'source' => 'clouds',
+                    'source-layer' => 'clouds',
+                    'paint' => [
+                        'line-color' => 'rgba(85, 191, 255, 0.7)'
+                    ],
+                    'filter' => $filter
                 ]
             ]
         ]));
