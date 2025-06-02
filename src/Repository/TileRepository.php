@@ -31,19 +31,27 @@ readonly class TileRepository
      */
     public function store(TilePosition $position, Tile $tile)
     {
-        $this->cache->delete($position);
-        return $this->cache->get($position, fn() => gzencode($tile->serializeToString()));
+        $key = $this->getKey($position);
+        $this->cache->delete($key);
+        return $this->cache->get($key,
+            function (ItemInterface $item) use ($tile) {
+            $item->expiresAfter(86400);
+            return gzencode($tile->serializeToString());
+        });
     }
 
     /**
      * @throws InvalidArgumentException
      */
-    public function get(TilePosition $position)
+    public function get(TilePosition $position, string $time)
     {
-        return $this->cache->get($position, function (ItemInterface $item) use ($position) {
+        return $this->cache->get($this->getKey($position, $time),
+            function (ItemInterface $item) use ($position, $time) {
+            if ($position->getZoom() <= CloudUpdateService::MAX_ZOOM) {
+                return null;
+            }
             $item->expiresAfter(60);
-            return $position->getZoom() > CloudUpdateService::MAX_ZOOM ?
-                $this->getRaw($position) : null;
+            return $this->getRaw($position, $time);
         });
     }
 
@@ -55,7 +63,7 @@ readonly class TileRepository
      */
     public function storeRaw(TilePosition $position, array $clouds): mixed
     {
-        $key = "raw$position";
+        $key = "raw{$this->getKey($position)}";
         $this->cache->delete($key);
         return $this->cache->get($key, fn() => gzencode($this->geoJSONWriter->write(new FeatureCollection(
             ...array_map(fn(FeatureEntity $feature) => $feature->asGeoJSONFeature(), $clouds)))));
@@ -65,19 +73,29 @@ readonly class TileRepository
      * @throws GeometryException
      * @throws InvalidArgumentException
      */
-    private function getRaw(TilePosition $position): ?string
+    private function getRaw(TilePosition $position, string $time): ?string
     {
         $scale = pow(2, $position->getZoom() - CloudUpdateService::MAX_ZOOM);
-        $data = $this->cache->get('raw'.TilePosition::xyz(
+        $data = $this->cache->get('raw'.$this->getKey(TilePosition::xyz(
                 (int)floor($position->getColumn() / $scale),
                 (int)floor($position->getRow() / $scale),
                 CloudUpdateService::MAX_ZOOM
-            ), fn() => null);
+            ), $time), fn() => null);
         if (!$data) {
             return null;
         }
         $source = $this->sourceFactory->create();
         $source->addCollection('clouds', $this->geoJSONReader->read(gzdecode($data)));
         return gzencode($this->tileService->getTileMVT($source->getFeatures(), $position)->serializeToString());
+    }
+
+    public function getCurrentTime(): string
+    {
+        return date('H:00');
+    }
+
+    private function getKey(TilePosition $position, ?string $time = null): string
+    {
+        return md5(($time ?? $this->getCurrentTime()).$position);
     }
 }

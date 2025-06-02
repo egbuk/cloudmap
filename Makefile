@@ -5,6 +5,9 @@ SOURCE_WIDTH := $(shell printenv SOURCE_WIDTH || echo '2048')
 build:
 	docker build -t heymoon/cloudmap .
 
+build.linux:
+	docker build --platform linux/amd64 -t heymoon/cloudmap .
+
 run: build
 	docker run -p 8123:80 -e MAP_TILER_TOKEN=$(MAP_TILER_TOKEN) \
 		-e SOURCE_HEIGHT=$(SOURCE_HEIGHT) -e SOURCE_WIDTH=$(SOURCE_WIDTH) \
@@ -18,4 +21,4 @@ exec:
 	docker exec -it cloudmap sh
 
 update:
-	docker exec -t cloudmap symfony app:update
+	docker exec -t cloudmap flock -n /run/map_update.lock symfony app:update

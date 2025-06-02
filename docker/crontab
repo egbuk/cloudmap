@@ -1,1 +1,1 @@
-* * * * * flock -n /run/map_update.lock symfony app:update
+0 * * * * flock -n /run/map_update.lock symfony app:update

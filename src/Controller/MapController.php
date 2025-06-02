@@ -3,6 +3,8 @@
 namespace App\Controller;
 
 use App\Repository\TileRepository;
+use DateTime;
+use Exception;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -18,13 +20,21 @@ class MapController extends AbstractController
     public function __construct(
         private readonly string $stylePath,
         private readonly string $mapTilerToken,
-        private readonly Filesystem $filesystem
+        private readonly Filesystem $filesystem,
+        private readonly TileRepository $tileRepository
     ) {}
 
+    /**
+     * @throws Exception
+     */
     #[Route('/', methods: ['GET'])]
     public function map(): Response
     {
-        return $this->render('map.html.twig');
+        $time = $this->tileRepository->getCurrentTime();
+        return $this->render('map.html.twig', [
+            'time' => (new DateTime($time))->getTimestamp(),
+            'display' => $time
+        ]);
     }
 
     /**
@@ -33,10 +43,20 @@ class MapController extends AbstractController
     #[Route('/clouds', methods: ['GET'])]
     public function clouds(#[MapQueryParameter] int $x,
                            #[MapQueryParameter] int $y,
-                           #[MapQueryParameter] int $z,
-                           TileRepository $tileRepository): Response
+                           #[MapQueryParameter] int $z): Response
     {
-        return new Response($tileRepository->get(TilePosition::xyzFlip($x, $y, $z)), 200, [
+        return $this->cloudsByTime($this->tileRepository->getCurrentTime(), $x, $y, $z);
+    }
+
+    /**
+     * @throws InvalidArgumentException
+     */
+    #[Route('/clouds/{time}', methods: ['GET'])]
+    public function cloudsByTime(string                   $time, #[MapQueryParameter] int $x,
+                                 #[MapQueryParameter] int $y,
+                                 #[MapQueryParameter] int $z): Response
+    {
+        return new Response($this->tileRepository->get(TilePosition::xyzFlip($x, $y, $z), $time), 200, [
             'Content-Type' => 'application/x-protobuf',
             'Content-Encoding' => 'gzip',
             'Access-Control-Allow-Origin' => '*'

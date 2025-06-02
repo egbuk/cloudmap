@@ -2,4 +2,8 @@
 {% block title %}Cloud map{% endblock %}
 {% block body %}
     <div id="map"></div>
+    <div id="time">
+        <label for="rewind">{{ display }}</label>
+        <input type="range" min="-23" max="0" name="rewind" id="rewind" value="0" data-time="{{ time }}">
+    </div>
 {% endblock %}
