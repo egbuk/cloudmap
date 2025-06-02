@@ -10,7 +10,6 @@ const map = new maplibregl.Map({
     attributionControl: false
 });
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
-
 const rewind = document.getElementById('rewind');
 rewind.value = 0;
 const label = document.querySelector('#time label');
@@ -22,7 +21,7 @@ const oninput = () => {
         map.setFilter(layer, ['==', 'time', `${time.getUTCHours()}:00`]);
     })
 };
-oninput();
+map.on('load', oninput);
 rewind.oninput = oninput;
 const nextHour = () => {
     setTimeout(nextHour,3600000);

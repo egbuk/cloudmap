@@ -110,7 +110,7 @@ readonly class CloudSearchService
                 $clouds[] = $cloud;
             }
         }
-        $start = time();
+        $start = time() * 1000;
         return new FeatureCollection(...array_map(fn(Geometry $cloud, int $key) =>
             new Feature($cloud, (object)array_merge($properties, ['id' => $key + $start])), $clouds, array_keys($clouds)));
     }
