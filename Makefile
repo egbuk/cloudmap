@@ -6,7 +6,8 @@ build:
 	docker build -t heymoon/cloudmap .
 
 build.linux:
-	docker build --platform linux/amd64 -t heymoon/cloudmap .
+	docker build --platform linux/amd64 -t heymoon/cloudmap . && \
+	docker push heymoon/cloudmap
 
 run: build
 	docker run -p 8123:80 -e MAP_TILER_TOKEN=$(MAP_TILER_TOKEN) \
