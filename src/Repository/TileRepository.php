@@ -99,6 +99,8 @@ readonly class TileRepository
 
     private function getKey(TilePosition $position, ?string $time = null): string
     {
-        return md5(($time ?? $this->getCurrentTime()).$position);
+        return md5(($time ?? date('H:0',
+                time()+60 // not defined only on update on 59th minute
+            )).$position);
     }
 }
