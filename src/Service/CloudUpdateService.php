@@ -59,7 +59,6 @@ readonly class CloudUpdateService
                     $decoded = $this->tileService->decodeGeometry($layer, $position);
                     /** @var Feature $feature */
                     foreach ($decoded->getFeatures() as $feature) {
-                        dump($feature->getParameters());
                         if ($feature->getParameter('time') === $time) {
                             continue;
                         }
