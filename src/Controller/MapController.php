@@ -80,7 +80,8 @@ class MapController extends AbstractController
                         "{$request->getSchemeAndHttpHost()}/clouds?x={x}&y={y}&z={z}"
                     ],
                     'minZoom' => 0,
-                    'maxZoom' => 22
+                    'maxZoom' => 22,
+                    'attribution' => 'Contains modified <a href="https://www.eumetsat.int" target="_blank">EUMETSAT</a> data '.date('Y')
                 ]
             ]
         ]));
