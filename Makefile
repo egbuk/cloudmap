@@ -5,7 +5,7 @@ SOURCE_WIDTH := $(shell printenv SOURCE_WIDTH || echo '2048')
 build:
 	docker build -t heymoon/cloudmap .
 
-build.linux:
+build.deploy:
 	docker build --platform linux/amd64 -t heymoon/cloudmap . && \
 	docker push heymoon/cloudmap
 
