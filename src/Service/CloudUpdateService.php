@@ -42,7 +42,7 @@ readonly class CloudUpdateService
     public function update(?ProgressBar $progressBar = null): void
     {
         $footage = $this->footageService->get();
-        $time = $this->tileRepository->getCurrentTime(1);
+        $time = $this->tileRepository->getCurrentTime(5);
         $clouds = $this->cloudSearchService->process($footage, compact('time'));
         $this->footageService->clear($footage);
         $source = $this->sourceFactory->create();
@@ -55,7 +55,6 @@ readonly class CloudUpdateService
                 $tile = $this->tileRepository->getTile($position);
                 foreach ($tile?->getLayers() ?? [] as $layer) {
                     $decoded = $this->tileService->decodeGeometry($layer, $position);
-                    /** @var Feature $feature */
                     foreach ($decoded->getFeatures() as $feature) {
                         if ($feature->getParameter('time') === $time) {
                             continue;
