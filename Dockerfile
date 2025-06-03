@@ -1,12 +1,12 @@
 FROM node:24-alpine AS encore
 RUN apk add git woff2
 WORKDIR /build
+RUN git clone https://github.com/koemaeda/gohufont-ttf.git
 COPY package*.json /build/
 RUN npm install
 COPY webpack.config.js /build/
 ADD assets /build/assets
-RUN git clone https://github.com/koemaeda/gohufont-ttf.git && \
-    woff2_compress gohufont-ttf/gohufont-11.ttf && \
+RUN woff2_compress gohufont-ttf/gohufont-11.ttf && \
     mv gohufont-ttf/*woff2 ./assets/styles
 RUN npm run build
 FROM php:8.4-fpm-alpine3.20
