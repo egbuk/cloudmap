@@ -42,7 +42,7 @@ readonly class CloudUpdateService
     public function update(?ProgressBar $progressBar = null): void
     {
         $footage = $this->footageService->get();
-        $time = $this->tileRepository->getCurrentTime(5);
+        $time = $this->tileRepository->getCurrentTime(15);
         $clouds = $this->cloudSearchService->process($footage, compact('time'));
         $this->footageService->clear($footage);
         $source = $this->sourceFactory->create();
