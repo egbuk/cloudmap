@@ -18,7 +18,7 @@ const oninput = () => {
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
     ['cloud', 'cloud_edge'].forEach((layer) => {
-        map.setFilter(layer, ['==', 'time', `${time.getUTCHours()}:00`]);
+        map.setFilter(layer, ['==', 'time', `${('0'+time.getUTCHours()).slice(-2)}:00`]);
     })
 };
 map.on('load', oninput);
