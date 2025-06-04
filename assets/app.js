@@ -27,20 +27,19 @@ const oninput = (trigger = true) => {
     if (trigger === false) {
         return;
     }
-    if (rewind.value === '-23') {
-        clearTimeout(playTimeout);
-        playTimeout = setTimeout(() => {
-            clearInterval(playInterval);
-            playInterval = setInterval(() => {
-                let val = parseInt(rewind.value) + 1;
-                rewind.value = val > 0 ? rewind.min : val;
-                oninput(false);
-            }, 500);
-        }, 5000);
-    } else {
-        clearTimeout(playTimeout);
-        clearInterval(playInterval);
+    clearTimeout(playTimeout);
+    clearInterval(playInterval);
+    if (rewind.value !== '-23') {
+        return;
     }
+    playTimeout = setTimeout(() => {
+        clearInterval(playInterval);
+        playInterval = setInterval(() => {
+            let val = parseInt(rewind.value) + 1;
+            rewind.value = val > 0 ? rewind.min : val;
+            oninput(false);
+        }, 500);
+    }, 5000);
 };
 rewind.oninput = oninput;
 const nextHour = () => {
