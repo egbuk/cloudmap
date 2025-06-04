@@ -38,6 +38,7 @@ const oninput = (trigger = true) => {
             }, 500);
         }, 5000);
     } else {
+        clearTimeout(playTimeout);
         clearInterval(playInterval);
     }
 };
