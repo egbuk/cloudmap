@@ -51,6 +51,6 @@ const nextHour = () => {
         url.searchParams.set('time', new Date().getTime().toString());
         return decodeURI(url.toString());
     }));
-    oninput();
+    oninput(false);
 };
 setTimeout(nextHour,(rewind.dataset.time*1000+3600000)-new Date().getTime());
