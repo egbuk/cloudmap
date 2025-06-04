@@ -66,18 +66,11 @@ readonly class CloudUpdateService
                     $preserved), $position));
             });
             if ($zoom === static::MAX_ZOOM) {
-                $grid->iterate(function (TilePosition $position, array $clouds) use ($time) {
-                    $preserved = [];
-                    $decoded = $this->tileRepository->getRawLayer($position);
-                    /** @var Feature $feature */
-                    foreach ($decoded?->getFeatures() ?? [] as $feature) {
-                        if ($feature->getParameter('time') === $time) {
-                            continue;
-                        }
-                        $preserved[] = $feature;
-                    }
-                    $this->tileRepository->storeRaw($position, array_merge($clouds, $preserved));
-                });
+                $grid->iterate(fn (TilePosition $position, array $clouds) =>
+                $this->tileRepository->storeRaw($position, array_merge($clouds, array_filter(
+                    $this->tileRepository->getRawLayer($position)?->getFeatures() ?? [],
+                    fn(Feature $feature) => $feature->getParameter('time') !== $time
+                ))));
             }
             $progressBar?->advance();
         }

@@ -5,6 +5,7 @@ namespace App\Command;
 use App\Service\CloudUpdateService;
 use Brick\Geo\Exception\CoordinateSystemException;
 use Brick\Geo\Exception\GeometryEngineException;
+use Brick\Geo\Exception\GeometryException;
 use Brick\Geo\Exception\InvalidGeometryException;
 use ImagickException;
 use ImagickPixelException;
@@ -30,6 +31,7 @@ class Update extends Command
      * @throws ImagickPixelException
      * @throws InvalidGeometryException
      * @throws InvalidArgumentException
+     * @throws GeometryException
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
