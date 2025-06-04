@@ -6,8 +6,8 @@ Live vector cloud map based on [matteason/live-cloud-maps](https://github.com/ma
 
 # Environment variables
 * **MAP_TILER_TOKEN** - token from [MapTiler Cloud](https://cloud.maptiler.com/account/keys/) (for base layer)
-* **SOURCE_WIDTH** - `8192`/`4096`/`2048`/`1024`
-* **SOURCE_HEIGHT** - `4096`/`2048`/`1024`/`512`
+* **SOURCE_WIDTH** - `8192`/`4096`/`2048`/`1024` (default)
+* **SOURCE_HEIGHT** - `4096`/`2048`/`1024`/`512` (default)
 
 # Stack
 * [heymoon/vector-tile-data-provider](https://packagist.org/packages/heymoon/vector-tile-data-provider)

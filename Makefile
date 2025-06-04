@@ -1,6 +1,6 @@
 APP_SECRET := $(shell printenv APP_SECRET || echo 'secret')
-SOURCE_HEIGHT := $(shell printenv SOURCE_HEIGHT || echo '1024')
-SOURCE_WIDTH := $(shell printenv SOURCE_WIDTH || echo '2048')
+SOURCE_HEIGHT := $(shell printenv SOURCE_HEIGHT || echo '512')
+SOURCE_WIDTH := $(shell printenv SOURCE_WIDTH || echo '1024')
 
 build:
 	docker build -t heymoon/cloudmap .
