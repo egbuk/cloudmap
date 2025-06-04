@@ -3,12 +3,12 @@
 namespace App\Controller;
 
 use App\Repository\TileRepository;
+use App\Service\StyleService;
 use DateTime;
 use Exception;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,9 +18,7 @@ use Symfony\Component\Routing\Attribute\Route;
 class MapController extends AbstractController
 {
     public function __construct(
-        private readonly string $stylePath,
-        private readonly string $mapTilerToken,
-        private readonly Filesystem $filesystem,
+        private readonly StyleService $styleService,
         private readonly TileRepository $tileRepository
     ) {}
 
@@ -55,58 +53,8 @@ class MapController extends AbstractController
     #[Route('/style', methods: ['GET'])]
     public function style(Request $request): JsonResponse
     {
-        $filter = ['==', 'time', $this->tileRepository->getCurrentTime()];
-        return $this->json(array_merge_recursive(json_decode($this->filesystem->readFile($this->stylePath), true), [
-            'glyphs' => "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=$this->mapTilerToken",
-            'sources' => [
-                'contours' => [
-                    'url' => "https://api.maptiler.com/tiles/contours-v2/tiles.json?key=$this->mapTilerToken",
-                    'type' => 'vector'
-                ],
-                'maptiler_planet' => [
-                    'url' => "https://api.maptiler.com/tiles/v3/tiles.json?key=$this->mapTilerToken",
-                     'type' => 'vector'
-                ],
-                'outdoor' => [
-                    'url' => "https://api.maptiler.com/tiles/outdoor/tiles.json?key=$this->mapTilerToken",
-                    'type' => 'vector'
-                ],
-                'terrain-rgb' => [
-                    'url' => "https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=$this->mapTilerToken",
-                    'type' => 'raster-dem'
-                ],
-                'clouds' => [
-                    'type' => 'vector',
-                    'tiles' => [
-                        "{$request->getSchemeAndHttpHost()}/clouds?x={x}&y={y}&z={z}"
-                    ],
-                    'minZoom' => 0,
-                    'maxZoom' => 22,
-                    'attribution' => 'Contains modified <a href="https://www.eumetsat.int" target="_blank">EUMETSAT</a> data '.date('Y')
-                ]
-            ],
-            'layers' => [
-                [
-                    'id' => 'cloud',
-                    'type' => 'fill',
-                    'source' => 'clouds',
-                    'source-layer' => 'clouds',
-                    'paint' => [
-                        'fill-color' => 'rgba(255, 255, 255, 0.5)'
-                    ],
-                    'filter' => $filter
-                ],
-                [
-                    'id' => 'cloud_edge',
-                    'type' => 'line',
-                    'source' => 'clouds',
-                    'source-layer' => 'clouds',
-                    'paint' => [
-                        'line-color' => 'rgba(85, 191, 255, 0.7)'
-                    ],
-                    'filter' => $filter
-                ]
-            ]
-        ]));
+        return $this->json($this->styleService->getStyle(
+            $request->getSchemeAndHttpHost(), $this->tileRepository->getCurrentTime()
+        ));
     }
 }
