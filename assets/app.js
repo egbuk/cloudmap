@@ -15,13 +15,31 @@ const map = new maplibregl.Map({
     attributionControl: false
 });
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
-const oninput = () => {
+let playInterval;
+let playTimeout;
+const oninput = (trigger = true) => {
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
     ['cloud', 'cloud_edge'].forEach((layer) => {
         map.setFilter(layer, ['==', 'time', `${('0'+time.getUTCHours()).slice(-2)}:00`]);
-    })
+    });
+    if (trigger === false) {
+        return;
+    }
+    if (rewind.value === '-23') {
+        clearTimeout(playTimeout);
+        playTimeout = setTimeout(() => {
+            clearInterval(playInterval);
+            playInterval = setInterval(() => {
+                let val = parseInt(rewind.value) + 1;
+                rewind.value = val > 0 ? rewind.min : val;
+                oninput(false);
+            }, 500);
+        }, 5000);
+    } else {
+        clearInterval(playInterval);
+    }
 };
 rewind.oninput = oninput;
 const nextHour = () => {
