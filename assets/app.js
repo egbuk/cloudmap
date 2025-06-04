@@ -29,7 +29,7 @@ const oninput = (trigger = true) => {
     }
     clearTimeout(playTimeout);
     clearInterval(playInterval);
-    if (rewind.value !== '-23') {
+    if (rewind.value !== rewind.min) {
         return;
     }
     playTimeout = setTimeout(() => {
