@@ -11,7 +11,7 @@ RUN woff2_compress gohufont-ttf/gohufont-11.ttf && \
 RUN npm run build
 FROM php:8.4-fpm-alpine3.20
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS imagemagick-dev geos-dev git
-RUN apk add nginx imagemagick geos supervisor protoc redis
+RUN apk add nginx imagemagick geos supervisor protoc valkey
 RUN pecl install imagick protobuf redis && \
     git clone https://git.osgeo.org/gitea/geos/php-geos.git /usr/src/php/ext/geos && cd /usr/src/php/ext/geos && \
         	./autogen.sh && ./configure && make && \
@@ -25,5 +25,5 @@ WORKDIR /var/www
 ADD . /var/www
 COPY --from=encore /build/public/build /var/www/public/build
 RUN composer install && crontab /var/www/docker/crontab && \
-    ln -s /var/www/bin/console /usr/bin/symfony && mkdir -p /var/run/php && mkdir -p /var/redis
+    ln -s /var/www/bin/console /usr/bin/symfony && mkdir -p /var/run/php && mkdir -p /var/valkey
 CMD ["supervisord", "-c", "/etc/supervisord.conf", "--nodaemon"]
