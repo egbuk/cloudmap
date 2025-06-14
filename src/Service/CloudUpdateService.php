@@ -20,7 +20,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 
 readonly class CloudUpdateService
 {
-    public const MAX_ZOOM = 5;
+    public const MAX_ZOOM = 4;
 
     public function __construct(
         private FootageService $footageService,
