@@ -9,6 +9,10 @@ build.deploy:
 	docker build --platform linux/amd64 -t heymoon/cloudmap . && \
 	docker push heymoon/cloudmap
 
+build.deploy.podman:
+	podman build --platform linux/amd64 -t heymoon/cloudmap . && \
+	podman push heymoon/cloudmap
+
 run: build
 	docker run -p 8123:80 -e MAP_TILER_TOKEN=$(MAP_TILER_TOKEN) \
 		-e SOURCE_HEIGHT=$(SOURCE_HEIGHT) -e SOURCE_WIDTH=$(SOURCE_WIDTH) \

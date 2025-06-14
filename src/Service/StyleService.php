@@ -44,22 +44,28 @@ readonly class StyleService
             ],
             'layers' => [
                 [
-                    'id' => 'cloud',
+                    'id' => 'cloud_shadow',
                     'type' => 'fill',
                     'source' => 'clouds',
                     'source-layer' => 'clouds',
                     'paint' => [
-                        'fill-color' => 'rgba(255, 255, 255, 0.5)'
+                        'fill-color' => '#000',
+                        'fill-opacity' => 0.3,
+                        'fill-translate' => [1, 1]
+
                     ],
                     'filter' => $filter
                 ],
                 [
-                    'id' => 'cloud_edge',
-                    'type' => 'line',
+                    'id' => 'cloud_sky',
+                    'type' => 'fill-extrusion',
                     'source' => 'clouds',
                     'source-layer' => 'clouds',
                     'paint' => [
-                        'line-color' => 'rgba(85, 191, 255, 0.7)'
+                        'fill-extrusion-base' => 7000,
+                        'fill-extrusion-height' => 6000,
+                        'fill-extrusion-color' => '#fff',
+                        'fill-extrusion-opacity' => 0.5
                     ],
                     'filter' => $filter
                 ]
