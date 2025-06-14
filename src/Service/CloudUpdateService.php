@@ -12,6 +12,7 @@ use HeyMoon\VectorTileDataProvider\Contract\SourceFactoryInterface;
 use HeyMoon\VectorTileDataProvider\Contract\TileServiceInterface;
 use HeyMoon\VectorTileDataProvider\Entity\Feature;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
+use HeyMoon\VectorTileDataProvider\Service\TileService;
 use ImagickException;
 use ImagickPixelException;
 use Psr\Cache\InvalidArgumentException;
@@ -63,7 +64,7 @@ readonly class CloudUpdateService
                     }
                 }
                 $this->tileRepository->store($position, $this->tileService->getTileMVT(array_merge($clouds,
-                    $preserved), $position));
+                    $preserved), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 5));
             });
             if ($zoom === static::MAX_ZOOM) {
                 $grid->iterate(fn (TilePosition $position, array $clouds) =>

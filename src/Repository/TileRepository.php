@@ -13,6 +13,7 @@ use HeyMoon\VectorTileDataProvider\Contract\SourceFactoryInterface;
 use HeyMoon\VectorTileDataProvider\Contract\TileServiceInterface;
 use HeyMoon\VectorTileDataProvider\Entity\Feature as FeatureEntity;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
+use HeyMoon\VectorTileDataProvider\Service\TileService;
 use Psr\Cache\InvalidArgumentException;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -116,7 +117,7 @@ readonly class TileRepository
     private function getRaw(TilePosition $position): ?string
     {
         return gzencode($this->tileService->getTileMVT(
-            $this->getRawLayer($position)->getFeatures(), $position
+            $this->getRawLayer($position)->getFeatures(), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 5
         )->serializeToString());
     }
 

@@ -38,3 +38,6 @@ exec.podman:
 
 update:
 	docker exec -t cloudmap flock -n /run/map_update.lock symfony app:update
+
+update.podman:
+	podman exec -t cloudmap flock -n /run/map_update.lock symfony app:update
