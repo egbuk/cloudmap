@@ -17,13 +17,23 @@ const map = new maplibregl.Map({
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
 let playInterval;
 let playTimeout;
+const properties = {
+    'cloud_shadow': 'fill-opacity',
+    'cloud_sky': 'fill-extrusion-opacity'
+};
+let t = 'a';
+const invert = (v) => v === 'a' ? 'b' : 'a';
 const oninput = (trigger = true) => {
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
     ['cloud_shadow', 'cloud_sky'].forEach((layer) => {
-        map.setFilter(layer, ['==', 'time', `${('0'+time.getUTCHours()).slice(-2)}:00`]);
+        map.setFilter(`${layer}_${invert(t)}`, ['==', 'time', `${('0'+time.getUTCHours()).slice(-2)}:00`]);
+        map.setPaintProperty(`${layer}_${invert(t)}`, properties[layer],
+            map.getPaintProperty(`${layer}_${t}`, properties[layer]));
+        map.setPaintProperty(`${layer}_${t}`, properties[layer], 0);
     });
+    t = invert(t);
     if (trigger === false) {
         return;
     }

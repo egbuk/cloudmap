@@ -42,22 +42,22 @@ readonly class StyleService
                     'attribution' => 'Contains modified <a href="https://www.eumetsat.int" target="_blank">EUMETSAT</a> data '.date('Y')
                 ]
             ],
-            'layers' => [
+            'layers' => array_merge(...array_map(fn(string $transition) => [
                 [
-                    'id' => 'cloud_shadow',
+                    'id' => "cloud_shadow_$transition",
                     'type' => 'fill',
                     'source' => 'clouds',
                     'source-layer' => 'clouds',
                     'paint' => [
                         'fill-color' => '#000',
-                        'fill-opacity' => 0.3,
-                        'fill-translate' => [1, 1]
-
+                        'fill-translate' => [1, 1],
+                        'fill-opacity' => $transition === 'a' ? 0.3 : 0,
+                        'fill-opacity-transition' => ['duration' => 500]
                     ],
                     'filter' => $filter
                 ],
                 [
-                    'id' => 'cloud_sky',
+                    'id' => "cloud_sky_$transition",
                     'type' => 'fill-extrusion',
                     'source' => 'clouds',
                     'source-layer' => 'clouds',
@@ -65,11 +65,12 @@ readonly class StyleService
                         'fill-extrusion-base' => 7000,
                         'fill-extrusion-height' => 6000,
                         'fill-extrusion-color' => '#fff',
-                        'fill-extrusion-opacity' => 0.5
+                        'fill-extrusion-opacity' => $transition === 'a' ? 0.5 : 0,
+                        'fill-extrusion-opacity-transition' => ['duration' => 500]
                     ],
                     'filter' => $filter
                 ]
-            ]
+                ], ['a', 'b']))
         ]);
     }
 }
