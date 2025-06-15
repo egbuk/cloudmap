@@ -62,8 +62,8 @@ readonly class StyleService
                     'source' => 'clouds',
                     'source-layer' => 'clouds',
                     'paint' => [
-                        'fill-extrusion-base' => 7000,
-                        'fill-extrusion-height' => 6000,
+                        'fill-extrusion-base' => 6000,
+                        'fill-extrusion-height' => 7000,
                         'fill-extrusion-color' => '#fff',
                         'fill-extrusion-opacity' => $transition === 'a' ? 0.5 : 0,
                         'fill-extrusion-opacity-transition' => ['duration' => 500]

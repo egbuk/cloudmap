@@ -43,7 +43,7 @@ const oninput = (trigger = true) => {
             map.setPaintProperty(`${layer}_${t}`, properties[layer], 0);
         });
         t = invert(t);
-    }, 50);
+    }, 100);
     if (trigger === false) {
         return;
     }
