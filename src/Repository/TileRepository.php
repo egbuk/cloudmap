@@ -117,7 +117,7 @@ readonly class TileRepository
     private function getRaw(TilePosition $position): ?string
     {
         return gzencode($this->tileService->getTileMVT(
-            $this->getRawLayer($position)->getFeatures(), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 5
+            $this->getRawLayer($position)->getFeatures(), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 10
         )->serializeToString());
     }
 
