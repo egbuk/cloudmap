@@ -21,7 +21,7 @@ const oninput = (trigger = true) => {
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
-    ['cloud', 'cloud_edge'].forEach((layer) => {
+    ['cloud_shadow', 'cloud_sky'].forEach((layer) => {
         map.setFilter(layer, ['==', 'time', `${('0'+time.getUTCHours()).slice(-2)}:00`]);
     });
     if (trigger === false) {
