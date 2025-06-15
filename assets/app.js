@@ -23,17 +23,27 @@ const properties = {
 };
 let t = 'a';
 const invert = (v) => v === 'a' ? 'b' : 'a';
+const b = 1.25;
+let timeout;
 const oninput = (trigger = true) => {
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
     ['cloud_shadow', 'cloud_sky'].forEach((layer) => {
         map.setFilter(`${layer}_${invert(t)}`, ['==', 'time', `${('0'+time.getUTCHours()).slice(-2)}:00`]);
-        map.setPaintProperty(`${layer}_${invert(t)}`, properties[layer],
-            map.getPaintProperty(`${layer}_${t}`, properties[layer]));
-        map.setPaintProperty(`${layer}_${t}`, properties[layer], 0);
     });
-    t = invert(t);
+    clearTimeout(timeout);
+    timeout = setTimeout(() => {
+        ['cloud_shadow', 'cloud_sky'].forEach((layer) => {
+            const duration = map.getPaintProperty(`${layer}_${invert(t)}`, `${properties[layer]}-transition`).duration / b;
+            map.setPaintProperty(`${layer}_${invert(t)}`, `${properties[layer]}-transition`, {duration});
+            map.setPaintProperty(`${layer}_${invert(t)}`, properties[layer],
+                map.getPaintProperty(`${layer}_${t}`, properties[layer]));
+            map.setPaintProperty(`${layer}_${t}`, `${properties[layer]}-transition`, {duration: duration * b});
+            map.setPaintProperty(`${layer}_${t}`, properties[layer], 0);
+        });
+        t = invert(t);
+    }, 50);
     if (trigger === false) {
         return;
     }
@@ -48,7 +58,7 @@ const oninput = (trigger = true) => {
             let val = parseInt(rewind.value) + 1;
             rewind.value = val > 0 ? rewind.min : val;
             oninput(false);
-        }, 500);
+        }, 1000);
     }, 5000);
 };
 rewind.oninput = oninput;
