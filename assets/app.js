@@ -32,7 +32,7 @@ const properties = {
 let t = 0;
 const advance = (v, diff = 1) =>
     diff > 0 ? v > 1 ? 0 : v + 1 : v < 1 ? 2 : v - 1;
-const b = 1.256;
+const b = 1.255;
 let timeout = null;
 const layers = ['cloud_shadow', 'cloud_sky'];
 const setFilter = (buffer, value) => layers.forEach((layer) => {
