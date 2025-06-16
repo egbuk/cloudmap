@@ -37,8 +37,8 @@ const oninput = (trigger = true) => {
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
     clearTimeout(timeout);
+    setFilter(advance(t, d), rewind.value);
     timeout = setTimeout(() => {
-        setFilter(advance(t, d), rewind.value);
         layers.forEach((layer) => {
             const duration = map.getPaintProperty(`${layer}_${advance(t, d)}`, `${properties[layer]}-transition`).duration / b;
             map.setPaintProperty(`${layer}_${advance(t, d)}`,
