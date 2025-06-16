@@ -8,8 +8,8 @@ use Brick\Geo\IO\GeoJSON\FeatureCollection;
 use Brick\Geo\IO\GeoJSONReader;
 use Brick\Geo\IO\GeoJSONWriter;
 use Exception;
-use HeyMoon\VectorTileDataProvider\Contract\LayerInterface;
 use HeyMoon\VectorTileDataProvider\Contract\SourceFactoryInterface;
+use HeyMoon\VectorTileDataProvider\Contract\SourceInterface;
 use HeyMoon\VectorTileDataProvider\Contract\TileServiceInterface;
 use HeyMoon\VectorTileDataProvider\Entity\Feature as FeatureEntity;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
@@ -85,8 +85,12 @@ readonly class TileRepository
         $this->cache->delete($key);
         return $this->cache->get($key, function(ItemInterface $item) use ($clouds) {
             $item->expiresAfter(86400);
-            return gzencode($this->geoJSONWriter->write(new FeatureCollection(
-                ...array_map(fn(FeatureEntity $feature) => $feature->asGeoJSONFeature(), $clouds))));
+            $byLayers = [];
+            foreach ($clouds as $cloud) {
+                $byLayers[$cloud->getLayer()->getName()][] = $cloud;
+            };
+            return gzencode(json_encode(array_map(fn(array $clouds) => $this->geoJSONWriter->write(new FeatureCollection(
+                ...array_map(fn(FeatureEntity $feature) => $feature->asGeoJSONFeature(), $clouds))), $byLayers)));
         });
     }
 
@@ -94,7 +98,7 @@ readonly class TileRepository
      * @throws GeometryException
      * @throws InvalidArgumentException
      */
-    public function getRawLayer(TilePosition $position, string $name = 'clouds'): ?LayerInterface
+    public function getRawData(TilePosition $position): ?SourceInterface
     {
         $scale = pow(2, $position->getZoom() - CloudUpdateService::MAX_ZOOM);
         $data = $this->cache->get('raw'.$this->getKey(TilePosition::xyz(
@@ -106,8 +110,11 @@ readonly class TileRepository
             return null;
         }
         $source = $this->sourceFactory->create();
-        $source->addCollection($name, $this->geoJSONReader->read(gzdecode($data)));
-        return $source->getLayer($name);
+        $layers = json_decode(gzdecode($data), true);
+        foreach ($layers as $name => $layer) {
+            $source->addCollection($name, $this->geoJSONReader->read($layer));
+        }
+        return $source;
     }
 
     /**
@@ -116,9 +123,10 @@ readonly class TileRepository
      */
     private function getRaw(TilePosition $position): ?string
     {
-        return gzencode($this->tileService->getTileMVT(
-            $this->getRawLayer($position)->getFeatures(), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 10
-        )->serializeToString());
+        $data = $this->getRawData($position);
+        return $data ? gzencode($this->tileService->getTileMVT(
+            $data->getFeatures(), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 10
+        )->serializeToString()) : null;
     }
 
     public function getCurrentTime(?int $advance = null): string

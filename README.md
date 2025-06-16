@@ -1,13 +1,13 @@
 # About
-Live vector cloud map based on [matteason/live-cloud-maps](https://github.com/matteason/live-cloud-maps)
+Live vector cloud map based on live data provided by <https://eumetsat.int>
 
 ### <https://clouds.heymoon.cc>
 ![Preview](screenshot.png)
 
 # Environment variables
 * **MAP_TILER_TOKEN** - token from [MapTiler Cloud](https://cloud.maptiler.com/account/keys/) (for base layer)
-* **SOURCE_WIDTH** - `8192`/`4096`/`2048`/`1024` (default)
-* **SOURCE_HEIGHT** - `4096`/`2048`/`1024`/`512` (default)
+* **SOURCE_WIDTH** - `4096`(default)/`2048`/`1024`
+* **SOURCE_HEIGHT** - `2048`(default)/`1024`/`512`
 
 # Stack
 * [heymoon/vector-tile-data-provider](https://packagist.org/packages/heymoon/vector-tile-data-provider)

@@ -35,9 +35,11 @@ const advance = (v, diff = 1) =>
 const b = 1.255;
 let timeout = null;
 const layers = ['cloud_shadow', 'cloud_sky'];
+const stages = ['a', 'b'];
 const setFilter = (buffer, value) => layers.forEach((layer) => {
-    map.setFilter(`${layer}_${buffer}`, ['==', 'time', `${('0' + new Date(
-        rewind.dataset.time * 1000 + value * 3600000).getUTCHours()).slice(-2)}:00`]);
+    stages.forEach(stage => map.setFilter(`${layer}_${stage}_${buffer}`, ['==', 'time', `${('0' + new Date(
+        rewind.dataset.time * 1000 + value * 3600000).getUTCHours()).slice(-2)}:00`]));
+
 });
 const oninput = (trigger = true) => {
     const d = rewind.value === rewind.min && lastVal === '0' ? -1 :
@@ -52,14 +54,17 @@ const oninput = (trigger = true) => {
     timeout = setTimeout(() => {
         timeout = null;
         layers.forEach((layer) => {
-            const duration = map.getPaintProperty(`${layer}_${advance(t, d)}`, `${properties[layer]}-transition`).duration / b;
-            map.setPaintProperty(`${layer}_${advance(t, d)}`,
-                `${properties[layer]}-transition`, {duration});
-            map.setPaintProperty(`${layer}_${advance(t, d)}`, properties[layer],
-                map.getPaintProperty(`${layer}_${t}`, properties[layer]));
-            map.setPaintProperty(`${layer}_${t}`, `${properties[layer]}-transition`,
-                {duration: duration * b});
-            map.setPaintProperty(`${layer}_${t}`, properties[layer], 0);
+            stages.forEach((stage) => {
+                const duration = map.getPaintProperty(`${layer}_${stage}_${advance(t, d)}`,
+                `${properties[layer]}-transition`).duration / b;
+                map.setPaintProperty(`${layer}_${stage}_${advance(t, d)}`,
+                    `${properties[layer]}-transition`, {duration});
+                map.setPaintProperty(`${layer}_${stage}_${advance(t, d)}`, properties[layer],
+                    map.getPaintProperty(`${layer}_${stage}_${t}`, properties[layer]));
+                map.setPaintProperty(`${layer}_${stage}_${t}`, `${properties[layer]}-transition`,
+                    {duration: duration * b});
+                map.setPaintProperty(`${layer}_${stage}_${t}`, properties[layer], 0);
+            });
         });
         t = advance(t, d);
         let val = parseInt(rewind.value);

@@ -12,7 +12,6 @@ use HeyMoon\VectorTileDataProvider\Contract\SourceFactoryInterface;
 use HeyMoon\VectorTileDataProvider\Contract\TileServiceInterface;
 use HeyMoon\VectorTileDataProvider\Entity\Feature;
 use HeyMoon\VectorTileDataProvider\Entity\TilePosition;
-use HeyMoon\VectorTileDataProvider\Service\TileService;
 use ImagickException;
 use ImagickPixelException;
 use Psr\Cache\InvalidArgumentException;
@@ -28,7 +27,9 @@ readonly class CloudUpdateService
         private SourceFactoryInterface $sourceFactory,
         private GridServiceInterface $gridService,
         private TileServiceInterface $tileService,
-        private TileRepository $tileRepository
+        private TileRepository $tileRepository,
+        private int $colorThreshold,
+        private int $fadeColorThreshold
     ) {}
 
     /**
@@ -42,12 +43,12 @@ readonly class CloudUpdateService
      */
     public function update(?ProgressBar $progressBar = null): void
     {
-        $footage = $this->footageService->get();
         $time = $this->tileRepository->getCurrentTime(15);
-        $clouds = $this->cloudSearchService->process($footage, compact('time'));
-        $this->footageService->clear($footage);
         $source = $this->sourceFactory->create();
-        $source->addCollection('clouds', $clouds);
+        $footage = $this->footageService->get();
+        $source->addCollection('clouds_a', $this->cloudSearchService->process($footage, compact('time'), $this->fadeColorThreshold));
+        $source->addCollection('clouds_b', $this->cloudSearchService->process($footage->addContrast(), compact('time'), $this->colorThreshold));
+        $this->footageService->clear($footage);
         $progressBar?->setMaxSteps(static::MAX_ZOOM + 1);
         foreach (range(0, static::MAX_ZOOM) as $zoom) {
             $grid = $this->gridService->getGrid($source, $zoom);
@@ -64,12 +65,13 @@ readonly class CloudUpdateService
                     }
                 }
                 $this->tileRepository->store($position, $this->tileService->getTileMVT(array_merge($clouds,
-                    $preserved), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 10));
+                    $preserved), $position, TileServiceInterface::DEFAULT_EXTENT,
+                    $position->getTileWidth() / 10));
             });
             if ($zoom === static::MAX_ZOOM) {
                 $grid->iterate(fn (TilePosition $position, array $clouds) =>
                 $this->tileRepository->storeRaw($position, array_merge($clouds, array_filter(
-                    $this->tileRepository->getRawLayer($position)?->getFeatures() ?? [],
+                    $this->tileRepository->getRawData($position)?->getFeatures() ?? [],
                     fn(Feature $feature) => $feature->getParameter('time') !== $time
                 ))));
             }

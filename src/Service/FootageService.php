@@ -5,6 +5,7 @@ namespace App\Service;
 use App\Entity\Footage;
 use ImagickException;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 readonly class FootageService
 {
@@ -13,9 +14,9 @@ readonly class FootageService
         private int $height,
         private int $width,
         private int $alphaThreshold,
-        private int $colorThreshold,
         private string $tempDir,
         private Filesystem $filesystem,
+        private HttpClientInterface $httpClient
     ) {}
 
     /**
@@ -24,8 +25,7 @@ readonly class FootageService
     public function get(): Footage
     {
         return new Footage($this->load(), $this->height, $this->width,
-            (float)$this->alphaThreshold / 255.0,
-            (float)$this->colorThreshold / 255.0);
+            (float)$this->alphaThreshold / 255.0);
     }
 
     public function clear(Footage $footage): void
@@ -35,9 +35,8 @@ readonly class FootageService
 
     private function load(): string
     {
-        $content = $this->filesystem->readFile($this->url);
-        $suffix = implode(array_slice(explode('.', $this->url), -1));
-        $name = $this->filesystem->tempnam($this->tempDir, 'clouds', ".$suffix");
+        $content = $this->httpClient->request('GET', $this->url)->getContent();
+        $name = $this->filesystem->tempnam($this->tempDir, 'clouds', '.png');
         $this->filesystem->dumpFile($name, $content);
         return $name;
     }

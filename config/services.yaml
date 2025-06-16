@@ -4,10 +4,12 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
-    env(SOURCE_WIDTH): '8192'
-    env(SOURCE_HEIGHT): '4096'
-    env(ALPHA_THRESHOLD): '220'
-    env(COLOR_THRESHOLD): '220'
+    env(SOURCE_WIDTH): '4096'
+    env(SOURCE_HEIGHT): '2048'
+    env(ALPHA_THRESHOLD): '250'
+    env(COLOR_THRESHOLD): '150'
+    env(FADE_COLOR_THRESHOLD): '100'
+
 
 services:
     # default configuration for services in *this* file
@@ -18,6 +20,9 @@ services:
             $tempDir: '/tmp'
             $stylePath: '%kernel.project_dir%/style.json'
             $mapTilerToken: '%env(MAP_TILER_TOKEN)%'
+            $colorThreshold: '%env(int:COLOR_THRESHOLD)%'
+            $fadeColorThreshold: '%env(int:COLOR_THRESHOLD)%'
+
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -47,8 +52,7 @@ services:
         class: 'HeyMoon\VectorTileDataProvider\Service\TileService'
     App\Service\FootageService:
         bind:
-            $url: 'https://clouds.matteason.co.uk/images/%env(SOURCE_WIDTH)%x%env(SOURCE_HEIGHT)%/clouds-alpha.png'
+            $url: 'https://view.eumetsat.int/geoserver/ows?service=WMS&request=GetMap&version=1.3.0&layers=mumi:worldcloudmap_ir108&styles=&format=image/png&crs=EPSG:4326&bbox=-69,-179,69,179&width=%env(SOURCE_WIDTH)%&height=%env(SOURCE_HEIGHT)%'
             $width: '%env(int:SOURCE_WIDTH)%'
             $height: '%env(int:SOURCE_HEIGHT)%'
             $alphaThreshold: '%env(int:ALPHA_THRESHOLD)%'
-            $colorThreshold: '%env(int:COLOR_THRESHOLD)%'

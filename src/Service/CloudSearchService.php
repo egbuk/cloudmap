@@ -37,14 +37,13 @@ readonly class CloudSearchService
      * @throws ImagickPixelException
      * @throws InvalidGeometryException
      */
-    public function process(Footage $footage, array $properties): FeatureCollection
+    public function process(Footage $footage, array $properties, int $threshold): FeatureCollection
     {
         $clouds = [];
+        $color = $threshold / 255;
         foreach (range(1, $footage->getWidth()) as $x) {
-            /** WebMercator from 5 to 185 degrees */
-            foreach (range((int)($footage->getHeight() / 180 * 5), (int)($footage->getHeight() -
-                ($footage->getHeight() / 180 * 5))) as $y) {
-                if ($footage->hasCloud($x, $y)) {
+            foreach (range(1, $footage->getHeight()) as $y) {
+                if ($footage->hasCloud($x, $y, $color)) {
                     $clouds[$x][$y] = true;
                 }
             }
@@ -112,13 +111,14 @@ readonly class CloudSearchService
         }
         $start = time() * 1000;
         return new FeatureCollection(...array_map(fn(Geometry $cloud, int $key) =>
-            new Feature($cloud, (object)array_merge($properties, ['id' => $key + $start])), $clouds, array_keys($clouds)));
+            new Feature($cloud, (object)array_merge($properties, ['id' => $key + $start])),
+            $clouds, array_keys($clouds)));
     }
 
     protected function getPoint(int $x, int $y, Footage $footage): Point
     {
-        return Point::xy((float)$x / ((float)$footage->getWidth()) * 360 - 180,
-            (float)$y / ((float)$footage->getHeight()) * 180 - 90,
+        return Point::xy((float)$x / ((float)$footage->getWidth()) * 358 - 179,
+            (float)$y / ((float)$footage->getHeight()) * 138 - 69,
             WorldGeodeticProjection::SRID);
     }
 }

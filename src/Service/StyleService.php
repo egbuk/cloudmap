@@ -6,6 +6,11 @@ use Symfony\Component\Filesystem\Filesystem;
 
 readonly class StyleService
 {
+    protected const HEIGHT = [
+        'a' => [6000, 7000],
+        'b' => [7500, 8000]
+    ];
+
     public function __construct(private string $stylePath,
                                 private string $mapTilerToken,
                                 private Filesystem $filesystem) {}
@@ -45,35 +50,35 @@ readonly class StyleService
                     'attribution' => 'Contains modified <a href="https://www.eumetsat.int" target="_blank">EUMETSAT</a> data '.date('Y')
                 ]
             ],
-            'layers' => array_merge(...array_map(fn(int $transition) => [
+            'layers' => array_merge(...array_map(fn(int $transition) => array_merge(...array_map(fn(string $stage) => [
                 [
-                    'id' => "cloud_shadow_$transition",
+                    'id' => "cloud_shadow_{$stage}_$transition",
                     'type' => 'fill',
                     'source' => 'clouds',
-                    'source-layer' => 'clouds',
+                    'source-layer' => "clouds_$stage",
                     'paint' => [
                         'fill-color' => '#000',
                         'fill-translate' => [1, 1],
-                        'fill-opacity' => $transition ? 0 : 0.3,
+                        'fill-opacity' => $transition ? 0 : 0.1,
                         'fill-opacity-transition' => ['duration' => 500]
                     ],
                     'filter' => $filter[$transition]
                 ],
                 [
-                    'id' => "cloud_sky_$transition",
+                    'id' => "cloud_sky_{$stage}_$transition",
                     'type' => 'fill-extrusion',
                     'source' => 'clouds',
-                    'source-layer' => 'clouds',
+                    'source-layer' => "clouds_$stage",
                     'paint' => [
-                        'fill-extrusion-base' => 6000,
-                        'fill-extrusion-height' => 7000,
+                        'fill-extrusion-base' => min(static::HEIGHT[$stage]),
+                        'fill-extrusion-height' => max(static::HEIGHT[$stage]),
                         'fill-extrusion-color' => '#fff',
-                        'fill-extrusion-opacity' => $transition ? 0 : 0.5,
+                        'fill-extrusion-opacity' => $transition ? 0 : 0.3,
                         'fill-extrusion-opacity-transition' => ['duration' => 500]
                     ],
                     'filter' => $filter[$transition]
                 ]
-                ], array_keys($preload)))
+                ], array_keys(static::HEIGHT))), array_keys($preload)))
         ]);
     }
 }
