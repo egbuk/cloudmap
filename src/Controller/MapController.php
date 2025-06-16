@@ -17,6 +17,8 @@ use Symfony\Component\Routing\Attribute\Route;
 
 class MapController extends AbstractController
 {
+    protected const MIN = 22;
+
     public function __construct(
         private readonly StyleService $styleService,
         private readonly TileRepository $tileRepository
@@ -31,7 +33,8 @@ class MapController extends AbstractController
         $time = $this->tileRepository->getCurrentTime();
         return $this->render('map.html.twig', [
             'time' => (new DateTime($time))->getTimestamp(),
-            'display' => $time
+            'display' => $time,
+            'min' => self::MIN
         ]);
     }
 
@@ -55,7 +58,7 @@ class MapController extends AbstractController
     {
         return $this->json($this->styleService->getStyle(
             $request->getSchemeAndHttpHost(), ...array_map(fn(int $advance) =>
-            $this->tileRepository->getCurrentTime(-60 * $advance), range(0, 2))
+            $this->tileRepository->getCurrentTime(-60 * $advance), [0, self::MIN, 1])
         ));
     }
 }

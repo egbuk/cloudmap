@@ -4,6 +4,6 @@
     <div id="map"></div>
     <div id="time">
         <label for="rewind">{{ display }}</label>
-        <input type="range" min="-22" max="0" name="rewind" id="rewind" value="0" data-time="{{ time }}">
+        <input type="range" min="-{{ min }}" max="0" name="rewind" id="rewind" value="0" data-time="{{ time }}">
     </div>
 {% endblock %}

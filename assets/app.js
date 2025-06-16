@@ -16,7 +16,15 @@ const map = new maplibregl.Map({
 });
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
 let playInterval;
-let playTimeout;
+const setupAnimation = () => {
+    clearInterval(playInterval);
+    playInterval = setInterval(() => {
+        let val = parseInt(rewind.value) + 1;
+        rewind.value = val > 0 ? rewind.min : val;
+        oninput(false);
+    }, 710);
+}
+let playTimeout = setTimeout(setupAnimation, 15000);
 const properties = {
     'cloud_shadow': 'fill-opacity',
     'cloud_sky': 'fill-extrusion-opacity'
@@ -24,7 +32,7 @@ const properties = {
 let t = 0;
 const advance = (v, diff = 1) =>
     diff > 0 ? v > 1 ? 0 : v + 1 : v < 1 ? 2 : v - 1;
-const b = 1.25;
+const b = 1.256;
 let timeout = null;
 const layers = ['cloud_shadow', 'cloud_sky'];
 const setFilter = (buffer, value) => layers.forEach((layer) => {
@@ -32,7 +40,8 @@ const setFilter = (buffer, value) => layers.forEach((layer) => {
         rewind.dataset.time * 1000 + value * 3600000).getUTCHours()).slice(-2)}:00`]);
 });
 const oninput = (trigger = true) => {
-    const d = lastVal - rewind.value;
+    const d = rewind.value === rewind.min && lastVal === '0' ? -1 :
+        rewind.value === '0' && lastVal === rewind.min ? 1 : lastVal - rewind.value;
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
@@ -69,14 +78,7 @@ const oninput = (trigger = true) => {
     if (rewind.value !== rewind.min) {
         return;
     }
-    playTimeout = setTimeout(() => {
-        clearInterval(playInterval);
-        playInterval = setInterval(() => {
-            let val = parseInt(rewind.value) + 1;
-            rewind.value = val > 0 ? rewind.min : val;
-            oninput(false);
-        }, 710);
-    }, 5000);
+    playTimeout = setTimeout(setupAnimation, 5000);
 };
 rewind.oninput = oninput;
 const nextHour = () => {
