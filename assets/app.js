@@ -25,7 +25,7 @@ let t = 0;
 const advance = (v, diff = 1) =>
     diff > 0 ? v > 1 ? 0 : v + 1 : v < 1 ? 2 : v - 1;
 const b = 1.25;
-let timeout;
+let timeout = null;
 const layers = ['cloud_shadow', 'cloud_sky'];
 const setFilter = (buffer, value) => layers.forEach((layer) => {
     map.setFilter(`${layer}_${buffer}`, ['==', 'time', `${('0' + new Date(
@@ -37,8 +37,11 @@ const oninput = (trigger = true) => {
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
     clearTimeout(timeout);
-    setFilter(advance(t, d), rewind.value);
+    if (timeout === null) {
+        setFilter(advance(t, d), rewind.value);
+    }
     timeout = setTimeout(() => {
+        timeout = null;
         layers.forEach((layer) => {
             const duration = map.getPaintProperty(`${layer}_${advance(t, d)}`, `${properties[layer]}-transition`).duration / b;
             map.setPaintProperty(`${layer}_${advance(t, d)}`,
