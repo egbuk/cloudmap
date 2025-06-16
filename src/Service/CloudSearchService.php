@@ -37,12 +37,13 @@ readonly class CloudSearchService
      * @throws ImagickPixelException
      * @throws InvalidGeometryException
      */
-    public function process(Footage $footage, array $properties): FeatureCollection
+    public function process(Footage $footage, array $properties, int $threshold): FeatureCollection
     {
         $clouds = [];
+        $color = $threshold / 255;
         foreach (range(1, $footage->getWidth()) as $x) {
             foreach (range(1, $footage->getHeight()) as $y) {
-                if ($footage->hasCloud($x, $y)) {
+                if ($footage->hasCloud($x, $y, $color)) {
                     $clouds[$x][$y] = true;
                 }
             }
