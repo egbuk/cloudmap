@@ -54,7 +54,8 @@ class MapController extends AbstractController
     public function style(Request $request): JsonResponse
     {
         return $this->json($this->styleService->getStyle(
-            $request->getSchemeAndHttpHost(), $this->tileRepository->getCurrentTime()
+            $request->getSchemeAndHttpHost(), ...array_map(fn(int $advance) =>
+            $this->tileRepository->getCurrentTime(-60 * $advance), range(0, 2))
         ));
     }
 }

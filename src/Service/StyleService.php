@@ -10,9 +10,12 @@ readonly class StyleService
                                 private string $mapTilerToken,
                                 private Filesystem $filesystem) {}
 
-    public function getStyle(string $host, string $time): array
+    public function getStyle(string $host, string ...$preload): array
     {
-        $filter = ['==', 'time', $time];
+        $filter = [];
+        foreach ($preload as $i => $item) {
+            $filter[$i] = ['==', 'time', $item];
+        }
         return array_merge_recursive(json_decode($this->filesystem->readFile($this->stylePath), true), [
             'glyphs' => "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=$this->mapTilerToken",
             'sources' => [
@@ -42,7 +45,7 @@ readonly class StyleService
                     'attribution' => 'Contains modified <a href="https://www.eumetsat.int" target="_blank">EUMETSAT</a> data '.date('Y')
                 ]
             ],
-            'layers' => array_merge(...array_map(fn(string $transition) => [
+            'layers' => array_merge(...array_map(fn(int $transition) => [
                 [
                     'id' => "cloud_shadow_$transition",
                     'type' => 'fill',
@@ -51,10 +54,10 @@ readonly class StyleService
                     'paint' => [
                         'fill-color' => '#000',
                         'fill-translate' => [1, 1],
-                        'fill-opacity' => $transition === 'a' ? 0.3 : 0,
+                        'fill-opacity' => $transition ? 0 : 0.3,
                         'fill-opacity-transition' => ['duration' => 500]
                     ],
-                    'filter' => $filter
+                    'filter' => $filter[$transition]
                 ],
                 [
                     'id' => "cloud_sky_$transition",
@@ -65,12 +68,12 @@ readonly class StyleService
                         'fill-extrusion-base' => 6000,
                         'fill-extrusion-height' => 7000,
                         'fill-extrusion-color' => '#fff',
-                        'fill-extrusion-opacity' => $transition === 'a' ? 0.5 : 0,
+                        'fill-extrusion-opacity' => $transition ? 0 : 0.5,
                         'fill-extrusion-opacity-transition' => ['duration' => 500]
                     ],
-                    'filter' => $filter
+                    'filter' => $filter[$transition]
                 ]
-                ], ['a', 'b']))
+                ], array_keys($preload)))
         ]);
     }
 }

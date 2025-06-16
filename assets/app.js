@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const rewind = document.getElementById('rewind');
-rewind.value = 0;
+let lastVal= rewind.value = 0;
 const label = document.querySelector('#time label');
 label.innerText = new Date(rewind.dataset.time*1000)
     .toTimeString().split(':').slice(0, 2).join(':');
@@ -21,29 +21,43 @@ const properties = {
     'cloud_shadow': 'fill-opacity',
     'cloud_sky': 'fill-extrusion-opacity'
 };
-let t = 'a';
-const invert = (v) => v === 'a' ? 'b' : 'a';
+let t = 0;
+const advance = (v, diff = 1) =>
+    diff > 0 ? v > 1 ? 0 : v + 1 : v < 1 ? 2 : v - 1;
 const b = 1.25;
 let timeout;
+const layers = ['cloud_shadow', 'cloud_sky'];
+const setFilter = (buffer, value) => layers.forEach((layer) => {
+    map.setFilter(`${layer}_${buffer}`, ['==', 'time', `${('0' + new Date(
+        rewind.dataset.time * 1000 + value * 3600000).getUTCHours()).slice(-2)}:00`]);
+});
 const oninput = (trigger = true) => {
+    const d = lastVal - rewind.value;
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
-    ['cloud_shadow', 'cloud_sky'].forEach((layer) => {
-        map.setFilter(`${layer}_${invert(t)}`, ['==', 'time', `${('0'+time.getUTCHours()).slice(-2)}:00`]);
-    });
     clearTimeout(timeout);
     timeout = setTimeout(() => {
-        ['cloud_shadow', 'cloud_sky'].forEach((layer) => {
-            const duration = map.getPaintProperty(`${layer}_${invert(t)}`, `${properties[layer]}-transition`).duration / b;
-            map.setPaintProperty(`${layer}_${invert(t)}`, `${properties[layer]}-transition`, {duration});
-            map.setPaintProperty(`${layer}_${invert(t)}`, properties[layer],
+        setFilter(advance(t, d), rewind.value);
+        layers.forEach((layer) => {
+            const duration = map.getPaintProperty(`${layer}_${advance(t, d)}`, `${properties[layer]}-transition`).duration / b;
+            map.setPaintProperty(`${layer}_${advance(t, d)}`,
+                `${properties[layer]}-transition`, {duration});
+            map.setPaintProperty(`${layer}_${advance(t, d)}`, properties[layer],
                 map.getPaintProperty(`${layer}_${t}`, properties[layer]));
-            map.setPaintProperty(`${layer}_${t}`, `${properties[layer]}-transition`, {duration: duration * b});
+            map.setPaintProperty(`${layer}_${t}`, `${properties[layer]}-transition`,
+                {duration: duration * b});
             map.setPaintProperty(`${layer}_${t}`, properties[layer], 0);
         });
-        t = invert(t);
+        t = advance(t, d);
+        let val = parseInt(rewind.value);
+        let minVal = parseInt(rewind.min);
+        if (val > minVal) {
+            setFilter(advance(t, 1), rewind.value - 1);
+        }
+        setFilter(advance(t, -1), val < 0 ? val + 1 : minVal);
     }, 100);
+    lastVal = rewind.value;
     if (trigger === false) {
         return;
     }
@@ -58,7 +72,7 @@ const oninput = (trigger = true) => {
             let val = parseInt(rewind.value) + 1;
             rewind.value = val > 0 ? rewind.min : val;
             oninput(false);
-        }, 1000);
+        }, 710);
     }, 5000);
 };
 rewind.oninput = oninput;
