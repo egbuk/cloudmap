@@ -17,11 +17,11 @@ readonly class Footage
         private string $url,
         private int $height,
         private int $width,
-        private float $alphaThreshold,
         private float $colorThreshold
     )
     {
         $this->image = new Imagick($this->url);
+        $this->image->contrastImage(1);
     }
 
     public function getUrl(): string
@@ -46,7 +46,6 @@ readonly class Footage
     public function hasCloud(int $x, int $y): bool
     {
         $color = $this->image->getImagePixelColor($x, $y)->getColor(true);
-        return $color['a'] > $this->alphaThreshold &&
-            array_sum(array_slice($color, 0, 3)) / 3 > $this->colorThreshold;
+        return array_sum($color) / count($color) > $this->colorThreshold;
     }
 }

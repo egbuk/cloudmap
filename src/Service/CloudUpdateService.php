@@ -64,7 +64,8 @@ readonly class CloudUpdateService
                     }
                 }
                 $this->tileRepository->store($position, $this->tileService->getTileMVT(array_merge($clouds,
-                    $preserved), $position, TileService::DEFAULT_EXTENT, $position->getTileWidth() / 10));
+                    $preserved), $position, TileServiceInterface::DEFAULT_EXTENT,
+                    $position->getTileWidth() / 10));
             });
             if ($zoom === static::MAX_ZOOM) {
                 $grid->iterate(fn (TilePosition $position, array $clouds) =>
