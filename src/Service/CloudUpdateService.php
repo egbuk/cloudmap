@@ -19,7 +19,7 @@ use Symfony\Component\Console\Helper\ProgressBar;
 
 readonly class CloudUpdateService
 {
-    public const MAX_ZOOM = 4;
+    public const MAX_ZOOM = 6;
 
     public function __construct(
         private FootageService $footageService,
@@ -46,8 +46,10 @@ readonly class CloudUpdateService
         $time = $this->tileRepository->getCurrentTime(15);
         $source = $this->sourceFactory->create();
         $footage = $this->footageService->get();
-        $source->addCollection('clouds_a', $this->cloudSearchService->process($footage, compact('time'), $this->fadeColorThreshold));
-        $source->addCollection('clouds_b', $this->cloudSearchService->process($footage->addContrast(), compact('time'), $this->colorThreshold));
+        $source->addCollection('clouds_a', $this->cloudSearchService->process($footage,
+            compact('time'), $this->fadeColorThreshold));
+        $source->addCollection('clouds_b', $this->cloudSearchService->process($footage->addContrast(),
+            compact('time'), $this->colorThreshold));
         $this->footageService->clear($footage);
         $progressBar?->setMaxSteps(static::MAX_ZOOM + 1);
         foreach (range(0, static::MAX_ZOOM) as $zoom) {
