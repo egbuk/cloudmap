@@ -22,17 +22,16 @@ const setupAnimation = () => {
         let val = parseInt(rewind.value) + 1;
         rewind.value = val > 0 ? rewind.min : val;
         oninput(false);
-    }, 710);
+    }, 1710);
 }
 let playTimeout = setTimeout(setupAnimation, 15000);
 const properties = {
-    'cloud_shadow': 'fill-opacity',
-    'cloud_sky': 'fill-extrusion-opacity'
+    'cloud_shadow': ['fill-opacity'],
+    'cloud_sky': ['fill-extrusion-opacity', 'fill-extrusion-base', 'fill-extrusion-height']
 };
 let t = 0;
 const advance = (v, diff = 1) =>
     diff > 0 ? v > 1 ? 0 : v + 1 : v < 1 ? 2 : v - 1;
-const b = 1.255;
 let timeout = null;
 const layers = ['cloud_shadow', 'cloud_sky'];
 const stages = ['a', 'b'];
@@ -55,15 +54,11 @@ const oninput = (trigger = true) => {
         timeout = null;
         layers.forEach((layer) => {
             stages.forEach((stage) => {
-                const duration = map.getPaintProperty(`${layer}_${stage}_${advance(t, d)}`,
-                `${properties[layer]}-transition`).duration / b;
-                map.setPaintProperty(`${layer}_${stage}_${advance(t, d)}`,
-                    `${properties[layer]}-transition`, {duration});
-                map.setPaintProperty(`${layer}_${stage}_${advance(t, d)}`, properties[layer],
-                    map.getPaintProperty(`${layer}_${stage}_${t}`, properties[layer]));
-                map.setPaintProperty(`${layer}_${stage}_${t}`, `${properties[layer]}-transition`,
-                    {duration: duration * b});
-                map.setPaintProperty(`${layer}_${stage}_${t}`, properties[layer], 0);
+                properties[layer].forEach(property => {
+                    map.setPaintProperty(`${layer}_${stage}_${advance(t, d)}`, property,
+                        map.getPaintProperty(`${layer}_${stage}_${t}`, property));
+                    map.setPaintProperty(`${layer}_${stage}_${t}`, property, 0);
+                });
             });
         });
         t = advance(t, d);

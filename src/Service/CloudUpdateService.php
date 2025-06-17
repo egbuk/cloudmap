@@ -43,7 +43,7 @@ readonly class CloudUpdateService
      */
     public function update(?ProgressBar $progressBar = null): void
     {
-        $time = $this->tileRepository->getCurrentTime(30);
+        $time = $this->tileRepository->getCurrentTime(45);
         $source = $this->sourceFactory->create();
         $footage = $this->footageService->get();
         $source->addCollection('clouds_a', $this->cloudSearchService->process($footage,

@@ -30,6 +30,7 @@ readonly class CloudSearchService
     /**
      * @param Footage $footage
      * @param array $properties
+     * @param int $threshold
      * @return FeatureCollection
      * @throws CoordinateSystemException
      * @throws GeometryEngineException
