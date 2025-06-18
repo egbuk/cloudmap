@@ -36,9 +36,8 @@ let timeout = null;
 const layers = ['cloud_shadow', 'cloud_sky'];
 const stages = ['a', 'b'];
 const setFilter = (buffer, value) => layers.forEach((layer) => {
-    stages.forEach(stage => map.setFilter(`${layer}_${stage}_${buffer}`, ['==', 'time', `${('0' + new Date(
-        rewind.dataset.time * 1000 + value * 3600000).getUTCHours()).slice(-2)}:00`]));
-
+    stages.forEach(stage => map.setFilter(`${layer}_${stage}_${buffer}`, ['==', 'time',
+        `${('0' + new Date(rewind.dataset.time * 1000 + value * 3600000).getUTCHours()).slice(-2)}:00`]));
 });
 const oninput = (trigger = true) => {
     const d = rewind.value === rewind.min && lastVal === '0' ? -1 :
@@ -51,7 +50,6 @@ const oninput = (trigger = true) => {
         setFilter(advance(t, d), rewind.value);
     }
     timeout = setTimeout(() => {
-        timeout = null;
         layers.forEach((layer) => {
             stages.forEach((stage) => {
                 properties[layer].forEach(property => {
@@ -62,12 +60,16 @@ const oninput = (trigger = true) => {
             });
         });
         t = advance(t, d);
+        setFilter(t, rewind.value);
         let val = parseInt(rewind.value);
         let minVal = parseInt(rewind.min);
-        if (val > minVal) {
-            setFilter(advance(t, 1), rewind.value - 1);
-        }
-        setFilter(advance(t, -1), val < 0 ? val + 1 : minVal);
+        timeout = setTimeout(() => {
+            if (val > minVal) {
+                setFilter(advance(t, 1), rewind.value - 1);
+            }
+            setFilter(advance(t, -1), val < 0 ? val + 1 : minVal);
+            timeout = null;
+        }, 800);
     }, 100);
     lastVal = rewind.value;
     if (trigger === false) {
