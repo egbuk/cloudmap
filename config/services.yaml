@@ -19,7 +19,6 @@ services:
         bind:
             $tempDir: '/tmp'
             $stylePath: '%kernel.project_dir%/style.json'
-            $mapTilerToken: '%env(MAP_TILER_TOKEN)%'
             $colorThreshold: '%env(int:COLOR_THRESHOLD)%'
             $fadeColorThreshold: '%env(int:COLOR_THRESHOLD)%'
 

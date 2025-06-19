@@ -2,6 +2,7 @@
 
 namespace App\Service;
 
+use App\Repository\TileRepository;
 use Symfony\Component\Filesystem\Filesystem;
 
 readonly class StyleService
@@ -13,60 +14,39 @@ readonly class StyleService
     protected const TRANSITION = ['duration' => 800];
 
     public function __construct(private string $stylePath,
-                                private string $mapTilerToken,
+                                private TileRepository $tileRepository,
                                 private Filesystem $filesystem) {}
 
-    public function getStyle(string $host, string ...$preload): array
+    public function getStyle(string $host): array
     {
-        $filter = [];
-        foreach ($preload as $i => $item) {
-            $filter[$i] = ['==', 'time', $item];
-        }
         return array_merge_recursive(json_decode($this->filesystem->readFile($this->stylePath), true), [
-            'glyphs' => "https://api.maptiler.com/fonts/{fontstack}/{range}.pbf?key=$this->mapTilerToken",
             'sources' => [
-                'contours' => [
-                    'url' => "https://api.maptiler.com/tiles/contours-v2/tiles.json?key=$this->mapTilerToken",
-                    'type' => 'vector'
-                ],
-                'maptiler_planet' => [
-                    'url' => "https://api.maptiler.com/tiles/v3/tiles.json?key=$this->mapTilerToken",
-                    'type' => 'vector'
-                ],
-                'outdoor' => [
-                    'url' => "https://api.maptiler.com/tiles/outdoor/tiles.json?key=$this->mapTilerToken",
-                    'type' => 'vector'
-                ],
-                'terrain-rgb' => [
-                    'url' => "https://api.maptiler.com/tiles/terrain-rgb-v2/tiles.json?key=$this->mapTilerToken",
-                    'type' => 'raster-dem'
-                ],
                 'clouds' => [
                     'type' => 'vector',
                     'tiles' => [
                         "$host/clouds?x={x}&y={y}&z={z}"
                     ],
                     'minZoom' => 0,
-                    'maxZoom' => 22,
+                    'maxZoom' => 18,
                     'attribution' => 'Contains modified <a href="https://www.eumetsat.int" target="_blank">EUMETSAT</a> data '.date('Y')
                 ]
             ],
             'layers' => array_merge(...array_map(fn(int $transition) => array_merge(...array_map(fn(string $stage) => [
                 [
-                    'id' => "cloud_shadow_{$stage}_$transition",
+                    'id' => "cloud_shadow_{$stage}_{$this->tileRepository->getCurrentTime($transition * 60)}",
                     'type' => 'fill',
                     'source' => 'clouds',
                     'source-layer' => "clouds_$stage",
                     'paint' => [
                         'fill-color' => '#000',
                         'fill-translate' => [1, 1],
-                        'fill-opacity' => $transition ? 0 : 0.1,
+                        'fill-opacity' => $transition ? 0 : ['stops' => [[0, 0.3], [7, 0.1]]],
                         'fill-opacity-transition' => static::TRANSITION
                     ],
-                    'filter' => $filter[$transition]
+                    'filter' => $this->getFilter($transition)
                 ],
                 [
-                    'id' => "cloud_sky_{$stage}_$transition",
+                    'id' => "cloud_sky_{$stage}_{$this->tileRepository->getCurrentTime($transition * 60)}",
                     'type' => 'fill-extrusion',
                     'source' => 'clouds',
                     'source-layer' => "clouds_$stage",
@@ -76,12 +56,23 @@ readonly class StyleService
                         'fill-extrusion-height' => max(static::HEIGHT[$stage]),
                         'fill-extrusion-height-transition' => static::TRANSITION,
                         'fill-extrusion-color' => '#fff',
-                        'fill-extrusion-opacity' => $transition ? 0 : 0.3,
+                        'fill-extrusion-opacity' => $transition ? 0 : ['stops' => [
+                            [0, 0.7],
+                            [7, 0.3],
+                            [10, 0.3],
+                            [11, 0.1],
+                            [12, 0]
+                        ]],
                         'fill-extrusion-opacity-transition' => static::TRANSITION
                     ],
-                    'filter' => $filter[$transition]
+                    'filter' => $this->getFilter($transition)
                 ]
-                ], array_keys(static::HEIGHT))), array_keys($preload)))
+                ], array_keys(static::HEIGHT))), range(0, -23)))
         ]);
+    }
+
+    private function getFilter(int $advance)
+    {
+        return ['==', 'time', $this->tileRepository->getCurrentTime($advance * 60)];
     }
 }

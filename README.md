@@ -5,7 +5,6 @@ Live vector cloud map based on live data provided by <https://eumetsat.int>
 ![Preview](screenshot.png)
 
 # Environment variables
-* **MAP_TILER_TOKEN** - token from [MapTiler Cloud](https://cloud.maptiler.com/account/keys/) (for base layer)
 * **SOURCE_WIDTH** - `4096`(default)/`2048`/`1024`
 * **SOURCE_HEIGHT** - `2048`(default)/`1024`/`512`
 
@@ -15,5 +14,4 @@ Live vector cloud map based on live data provided by <https://eumetsat.int>
 * [libgeos](https://libgeos.org)
 * [imagemagick](https://imagemagick.org)
 * [MapLibre GL](https://maplibre.org)
-* [MapTiler](https://www.maptiler.com)
 * [Redis](https://redis.io)

@@ -3,7 +3,7 @@ import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
 const rewind = document.getElementById('rewind');
-let lastVal= rewind.value = 0;
+let lastVal = rewind.value = 0;
 const label = document.querySelector('#time label');
 label.innerText = new Date(rewind.dataset.time*1000)
     .toTimeString().split(':').slice(0, 2).join(':');
@@ -29,48 +29,25 @@ const properties = {
     'cloud_shadow': ['fill-opacity'],
     'cloud_sky': ['fill-extrusion-opacity', 'fill-extrusion-base', 'fill-extrusion-height']
 };
-let t = 0;
-const advance = (v, diff = 1) =>
-    diff > 0 ? v > 1 ? 0 : v + 1 : v < 1 ? 2 : v - 1;
-let timeout = null;
 const layers = ['cloud_shadow', 'cloud_sky'];
 const stages = ['a', 'b'];
-const setFilter = (buffer, value) => layers.forEach((layer) => {
-    stages.forEach(stage => map.setFilter(`${layer}_${stage}_${buffer}`, ['==', 'time',
-        `${('0' + new Date(rewind.dataset.time * 1000 + value * 3600000).getUTCHours()).slice(-2)}:00`]));
-});
+const getTime = offset => `${('0' + new Date(rewind.dataset.time * 1000 + offset * 3600000).getUTCHours()).slice(-2)}:00`;
 const oninput = (trigger = true) => {
     const d = rewind.value === rewind.min && lastVal === '0' ? -1 :
         rewind.value === '0' && lastVal === rewind.min ? 1 : lastVal - rewind.value;
     const time = new Date(rewind.dataset.time * 1000 +
         rewind.value * 3600000);
     label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
-    clearTimeout(timeout);
-    if (timeout === null) {
-        setFilter(advance(t, d), rewind.value);
-    }
-    timeout = setTimeout(() => {
-        layers.forEach((layer) => {
-            stages.forEach((stage) => {
-                properties[layer].forEach(property => {
-                    map.setPaintProperty(`${layer}_${stage}_${advance(t, d)}`, property,
-                        map.getPaintProperty(`${layer}_${stage}_${t}`, property));
-                    map.setPaintProperty(`${layer}_${stage}_${t}`, property, 0);
-                });
+    if (lastVal === rewind.value) return;
+    layers.forEach((layer) => {
+        stages.forEach((stage) => {
+            properties[layer].forEach(property => {
+                map.setPaintProperty(`${layer}_${stage}_${getTime(rewind.value)}`, property,
+                    map.getPaintProperty(`${layer}_${stage}_${getTime(lastVal)}`, property));
+                map.setPaintProperty(`${layer}_${stage}_${getTime(lastVal)}`, property, 0);
             });
         });
-        t = advance(t, d);
-        setFilter(t, rewind.value);
-        let val = parseInt(rewind.value);
-        let minVal = parseInt(rewind.min);
-        timeout = setTimeout(() => {
-            if (val > minVal) {
-                setFilter(advance(t, 1), rewind.value - 1);
-            }
-            setFilter(advance(t, -1), val < 0 ? val + 1 : minVal);
-            timeout = null;
-        }, 800);
-    }, 100);
+    });
     lastVal = rewind.value;
     if (trigger === false) {
         return;
