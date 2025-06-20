@@ -22,7 +22,7 @@ const setupAnimation = () => {
         let val = parseInt(rewind.value) + 1;
         rewind.value = val > 0 ? rewind.min : val;
         oninput(false);
-    }, 1710);
+    }, 220);
 }
 let playTimeout = setTimeout(setupAnimation, 15000);
 const properties = {
