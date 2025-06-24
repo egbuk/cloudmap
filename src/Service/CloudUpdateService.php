@@ -55,28 +55,29 @@ readonly class CloudUpdateService
         foreach (range(0, static::MAX_ZOOM) as $zoom) {
             $grid = $this->gridService->getGrid($source, $zoom);
             $grid->iterate(function (TilePosition $position, array $clouds) use ($time) {
-                $preserved = [];
-                $tile = $this->tileRepository->getTile($position);
-                foreach ($tile?->getLayers() ?? [] as $layer) {
-                    $decoded = $this->tileService->decodeGeometry($layer, $position);
-                    foreach ($decoded->getFeatures() as $feature) {
-                        if ($feature->getParameter('time') === $time) {
-                            continue;
+                if ($position->getZoom() === static::MAX_ZOOM) {
+                    $features = array_merge($clouds, array_filter(
+                        $this->tileRepository->getRawData($position)?->getFeatures() ?? [],
+                        fn(Feature $feature) => $feature->getParameter('time') !== $time
+                    ));
+                    $this->tileRepository->storeRaw($position, $features);
+                } else {
+                    $preserved = [];
+                    $tile = $this->tileRepository->getTile($position);
+                    foreach ($tile?->getLayers() ?? [] as $layer) {
+                        $decoded = $this->tileService->decodeGeometry($layer, $position);
+                        foreach ($decoded->getFeatures() as $feature) {
+                            if ($feature->getParameter('time') === $time) {
+                                continue;
+                            }
+                            $preserved[] = $feature;
                         }
-                        $preserved[] = $feature;
                     }
+                    $features = array_merge($clouds, $preserved);
                 }
-                $this->tileRepository->store($position, $this->tileService->getTileMVT(array_merge($clouds,
-                    $preserved), $position, TileServiceInterface::DEFAULT_EXTENT,
-                    $position->getTileWidth() / 10));
+                $this->tileRepository->store($position, $this->tileService->getTileMVT($features, $position,
+                    TileServiceInterface::DEFAULT_EXTENT, $position->getTileWidth() / 10));
             });
-            if ($zoom === static::MAX_ZOOM) {
-                $grid->iterate(fn (TilePosition $position, array $clouds) =>
-                $this->tileRepository->storeRaw($position, array_merge($clouds, array_filter(
-                    $this->tileRepository->getRawData($position)?->getFeatures() ?? [],
-                    fn(Feature $feature) => $feature->getParameter('time') !== $time
-                ))));
-            }
             $progressBar?->advance();
         }
     }

@@ -11,7 +11,9 @@ const map = new maplibregl.Map({
     container: 'map',
     style: '/style',
     center: [0, 0],
-    zoom: 1,
+    zoom: 4,
+    bearing: 135,
+    pitch: 50,
     attributionControl: false
 });
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
