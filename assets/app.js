@@ -7,16 +7,45 @@ let lastVal = rewind.value = 0;
 const label = document.querySelector('#time label');
 label.innerText = new Date(rewind.dataset.time*1000)
     .toTimeString().split(':').slice(0, 2).join(':');
+const [lng, lat, zoom, bearing, pitch, roll] =  window.location.hash.length > 1 ?
+window.location.hash.slice(1).split(';') : [];
 const map = new maplibregl.Map({
     container: 'map',
     style: '/style',
-    center: [0, 0],
-    zoom: 4,
-    bearing: 135,
-    pitch: 50,
-    attributionControl: false
+    center: [isNaN(parseFloat(lng)) ? -73.5804 : parseFloat(lng), isNaN(parseFloat(lat)) ? 45.53483 : parseFloat(lat)],
+    zoom: isNaN(parseInt(zoom)) ? 7 : parseInt(zoom),
+    bearing: isNaN(parseInt(bearing)) ? -60 : parseInt(bearing),
+    pitch: isNaN(parseInt(pitch)) ? 60 : parseInt(pitch),
+    roll: isNaN(parseInt(roll)) ? 0 : parseInt(roll),
+    attributionControl: false,
+    minZoom: 1
 });
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
+const updateAnchor = () => {
+    const {lng, lat} = map.getCenter();
+    const position = '#'+[lng, lat, map.getZoom(), map.getBearing(), map.getPitch()].join(';');
+    if (position === window.location.hash) {
+        return;
+    }
+    history.pushState({}, '', position);
+};
+updateAnchor();
+['moveend', 'dragend', 'zoomend', 'rotateend', 'pitchend'].forEach((event) => map.on(event, updateAnchor));
+window.addEventListener('popstate', () => {
+    const [lng, lat, zoom, bearing, pitch] = window.location.hash.slice(1).split(';') 
+    if (!isNaN(parseFloat(lng)) && !isNaN(parseFloat(lat))) {
+        map.flyTo({center: [parseFloat(lng), parseFloat(lat)], zoom: zoom});
+    }
+    if (!isNaN(parseInt(bearing))) {
+        map.setBearing(parseInt(bearing));
+    }
+    if (!isNaN(parseInt(pitch))) {
+        map.setBearing(parseInt(pitch));
+    }
+    if (!isNaN(parseInt(roll))) {
+        map.setBearing(parseInt(roll));
+    }
+});
 let playInterval;
 const setupAnimation = () => {
     clearInterval(playInterval);
