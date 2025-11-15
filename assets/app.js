@@ -14,16 +14,16 @@ const map = new maplibregl.Map({
     style: '/style',
     center: [isNaN(parseFloat(lng)) ? 37.618423 : parseFloat(lng), isNaN(parseFloat(lat)) ? 55.751244 : parseFloat(lat)],
     zoom: isNaN(parseInt(zoom)) ? 4 : parseInt(zoom),
-    bearing: isNaN(parseInt(bearing)) ? -60 : parseInt(bearing),
-    pitch: isNaN(parseInt(pitch)) ? 60 : parseInt(pitch),
-    roll: isNaN(parseInt(roll)) ? 0 : parseInt(roll),
+    bearing: isNaN(parseFloat(bearing)) ? -60 : parseFloat(bearing),
+    pitch: isNaN(parseFloat(pitch)) ? 60 : parseFloat(pitch),
+    roll: isNaN(parseFloat(roll)) ? 0 : parseFloat(roll),
     attributionControl: false,
     minZoom: 1
 });
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
 const updateAnchor = () => {
     const {lng, lat} = map.getCenter();
-    const position = '#'+[lng, lat, map.getZoom(), map.getBearing(), map.getPitch()].join(';');
+    const position = '#'+[lng, lat, map.getZoom(), map.getBearing(), map.getPitch(), map.getRoll()].join(';');
     if (position === window.location.hash) {
         return;
     }
@@ -32,18 +32,18 @@ const updateAnchor = () => {
 updateAnchor();
 ['moveend', 'dragend', 'zoomend', 'rotateend', 'pitchend'].forEach((event) => map.on(event, updateAnchor));
 window.addEventListener('popstate', () => {
-    const [lng, lat, zoom, bearing, pitch] = window.location.hash.slice(1).split(';') 
-    if (!isNaN(parseFloat(lng)) && !isNaN(parseFloat(lat))) {
-        map.flyTo({center: [parseFloat(lng), parseFloat(lat)], zoom: zoom});
+    const [lng, lat, zoom, bearing, pitch, roll] = window.location.hash.slice(1).split(';') 
+    if (!isNaN(parseFloat(lng)) && !isNaN(parseFloat(lat) && !isNaN(parseInt(zoom)))) {
+        map.flyTo({center: [parseFloat(lng), parseFloat(lat)], zoom: parseInt(zoom)});
     }
-    if (!isNaN(parseInt(bearing))) {
-        map.setBearing(parseInt(bearing));
+    if (!isNaN(parseFloat(bearing))) {
+        map.setBearing(parseFloat(bearing));
     }
-    if (!isNaN(parseInt(pitch))) {
-        map.setBearing(parseInt(pitch));
+    if (!isNaN(parseFloat(pitch))) {
+        map.setBearing(parseFloat(pitch));
     }
-    if (!isNaN(parseInt(roll))) {
-        map.setBearing(parseInt(roll));
+    if (!isNaN(parseFloat(roll))) {
+        map.setBearing(parseFloat(roll));
     }
 });
 let playInterval;
