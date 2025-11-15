@@ -8,7 +8,7 @@ COPY webpack.config.js /build/
 ADD assets /build/assets
 RUN woff2_compress gohufont-ttf/gohufont-11.ttf && \
     mv gohufont-ttf/*woff2 ./assets/styles
-RUN npm run dev
+RUN npm run build
 FROM php:8.4-fpm-alpine3.20
 RUN apk add --no-cache --virtual .build-deps $PHPIZE_DEPS imagemagick-dev geos-dev git
 RUN apk add nginx imagemagick geos supervisor protoc valkey

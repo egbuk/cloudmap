@@ -12,8 +12,8 @@ window.location.hash.slice(1).split(';') : [];
 const map = new maplibregl.Map({
     container: 'map',
     style: '/style',
-    center: [isNaN(parseFloat(lng)) ? -73.5804 : parseFloat(lng), isNaN(parseFloat(lat)) ? 45.53483 : parseFloat(lat)],
-    zoom: isNaN(parseInt(zoom)) ? 7 : parseInt(zoom),
+    center: [isNaN(parseFloat(lng)) ? 37.618423 : parseFloat(lng), isNaN(parseFloat(lat)) ? 55.751244 : parseFloat(lat)],
+    zoom: isNaN(parseInt(zoom)) ? 4 : parseInt(zoom),
     bearing: isNaN(parseInt(bearing)) ? -60 : parseInt(bearing),
     pitch: isNaN(parseInt(pitch)) ? 60 : parseInt(pitch),
     roll: isNaN(parseInt(roll)) ? 0 : parseInt(roll),
