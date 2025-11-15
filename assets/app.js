@@ -63,14 +63,6 @@ const oninput = (trigger = true) => {
 };
 rewind.oninput = oninput;
 const nextHour = () => {
-    setTimeout(nextHour,3600000);
-    rewind.dataset.time = (parseInt(rewind.dataset.time)+3600).toString();
-    const clouds = map.getSource('clouds');
-    clouds.setTiles(clouds.tiles.map((tile) => {
-        const url = new URL(tile);
-        url.searchParams.set('time', new Date().getTime().toString());
-        return decodeURI(url.toString());
-    }));
-    oninput(false);
+    window.location.reload();
 };
 setTimeout(nextHour,(rewind.dataset.time*1000+3600000)-new Date().getTime());
