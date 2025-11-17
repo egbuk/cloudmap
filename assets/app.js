@@ -13,7 +13,7 @@ const map = new maplibregl.Map({
     container: 'map',
     style: '/style',
     center: [isNaN(parseFloat(lng)) ? 37.618423 : parseFloat(lng), isNaN(parseFloat(lat)) ? 55.751244 : parseFloat(lat)],
-    zoom: isNaN(parseInt(zoom)) ? 4 : parseInt(zoom),
+    zoom: isNaN(parseFloat(zoom)) ? 4 : parseFloat(zoom),
     bearing: isNaN(parseFloat(bearing)) ? -60 : parseFloat(bearing),
     pitch: isNaN(parseFloat(pitch)) ? 60 : parseFloat(pitch),
     roll: isNaN(parseFloat(roll)) ? 0 : parseFloat(roll),
@@ -21,7 +21,10 @@ const map = new maplibregl.Map({
     minZoom: 1
 });
 map.addControl(new maplibregl.AttributionControl(), 'top-left');
-const updateAnchor = () => {
+const updateAnchor = (e = null) => {
+    if (e && e.popstate) {
+        return;
+    }
     const {lng, lat} = map.getCenter();
     const position = '#'+[lng, lat, map.getZoom(), map.getBearing(), map.getPitch(), map.getRoll()].join(';');
     if (position === window.location.hash) {
@@ -32,18 +35,19 @@ const updateAnchor = () => {
 updateAnchor();
 ['moveend', 'dragend', 'zoomend', 'rotateend', 'pitchend'].forEach((event) => map.on(event, updateAnchor));
 window.addEventListener('popstate', () => {
+    const eventData = {popstate: true};
     const [lng, lat, zoom, bearing, pitch, roll] = window.location.hash.slice(1).split(';') 
-    if (!isNaN(parseFloat(lng)) && !isNaN(parseFloat(lat) && !isNaN(parseInt(zoom)))) {
-        map.flyTo({center: [parseFloat(lng), parseFloat(lat)], zoom: parseInt(zoom)});
-    }
     if (!isNaN(parseFloat(bearing))) {
-        map.setBearing(parseFloat(bearing));
+        map.setBearing(parseFloat(bearing), eventData);
     }
     if (!isNaN(parseFloat(pitch))) {
-        map.setBearing(parseFloat(pitch));
+        map.setPitch(parseFloat(pitch), eventData);
     }
     if (!isNaN(parseFloat(roll))) {
-        map.setBearing(parseFloat(roll));
+        map.setRoll(parseFloat(roll), eventData);
+    }
+    if (!isNaN(parseFloat(lng)) && !isNaN(parseFloat(lat) && !isNaN(parseFloat(zoom)))) {
+        map.flyTo({center: [parseFloat(lng), parseFloat(lat)], zoom: parseFloat(zoom)}, eventData);
     }
 });
 let playInterval;
