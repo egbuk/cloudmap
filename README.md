@@ -6,6 +6,14 @@ Live vector cloud map based on live data provided by <https://eumetsat.int>
 
 ![Preview](screenshot.png)
 
+# Navigation
+* Supports mouse (for Desktop: drag with left button to move, right button to pan, scroll to zoom) and touch gestures (simmilar to Google Maps for smartphones or tablets)
+* Use browser's «back» and «forward» navigation buttons to browse camera movement history with smooth transition between previous locations
+* Share your observation spots across your devices and with other people: just copy full URL of the current map's page to include your camera's position as initial spot. Example links for places:
+    * [Sky over Sydney](https://clouds.heymoon.cc/#151.21;-33.86;10;0;45;0)
+    * [Sky over Tokyo](https://clouds.heymoon.cc/#139.778;35.68;10;0;45;0)
+    * [Sky over Moscow](https://clouds.heymoon.cc/#37.62;55.75;10;0;45;0)
+
 # Environment variables
 * **SOURCE_WIDTH** - `4096`(default)/`2048`/`1024`
 * **SOURCE_HEIGHT** - `2048`(default)/`1024`/`512`

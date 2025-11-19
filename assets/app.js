@@ -1,8 +1,11 @@
 import './styles/app.scss';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-const [lng, lat, zoom, bearing, pitch, roll] =  window.location.hash.length > 1 ?
-    window.location.hash.slice(1).split(';') : [];
+const parseHash = () => {
+    return window.location.hash.length > 1 ?
+            window.location.hash.slice(1).split(';') : []
+}
+let [lng, lat, zoom, bearing, pitch, roll] =  parseHash();
 const debug = localStorage.getItem('debug') || false;
 const style = localStorage.getItem('style') || '/style';
 const initial = JSON.parse(localStorage.getItem('initial')) ||
@@ -46,10 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
     updateAnchor();
     ['moveend', 'dragend', 'zoomend', 'rotateend', 'pitchend'].forEach((event) => map.on(event, updateAnchor));
-    window.addEventListener('popstate', (e) => {
-        const state = e.state;
-        if (!state) return;
-        if (debug) console.log(state);
+    const navigate = (state) => {
         const eventData = {popstate: true};
         if (!isNaN(state.bearing)) map.setBearing(state.bearing, eventData);
         if (!isNaN(state.pitch)) map.setPitch(state.pitch, eventData);
@@ -57,6 +57,25 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!isNaN(state.lng) && !isNaN(state.lat) && !isNaN(state.zoom)) {
             map.flyTo({center: [state.lng, state.lat], zoom: state.zoom}, eventData);
         }
+    }
+    window.addEventListener('popstate', (e) => {
+        const state = e.state;
+        if (!state) return;
+        if (debug) console.log(state);
+        navigate(state);
+    });
+    window.addEventListener('hashchange', () => {
+        let [lng, lat, zoom, bearing, pitch, roll] = parseHash();
+        const state = {
+            lng: isNaN(parseFloat(lng)) ? null : parseFloat(lng),
+            lat: isNaN(parseFloat(lat)) ? null : parseFloat(lat),
+            zoom: isNaN(parseFloat(zoom)) ? null : parseFloat(zoom),
+            bearing: isNaN(parseFloat(bearing)) ? null : parseFloat(bearing),
+            pitch: isNaN(parseFloat(pitch)) ? null : parseFloat(pitch),
+            roll: isNaN(parseFloat(roll)) ? null : parseFloat(roll)
+        };
+        console.log(state);
+        navigate(state);
     });
     const getTime = offset => `${('0' + new Date(rewind.dataset.time * 1000 + offset * 3600000).getUTCHours()).slice(-2)}:00`;
     const setupAnimation = () => {
