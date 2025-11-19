@@ -38,6 +38,7 @@ const updateAnchor = (e = null) => {
     if (debug) console.log(values);
     const params = [values, document.title, `#${position}`];
     window.location.hash.length > 1 ? history.pushState(...params) : history.replaceState(...params);
+    localStorage.setItem('initial', JSON.stringify(values));
 };
 updateAnchor();
 ['moveend', 'dragend', 'zoomend', 'rotateend', 'pitchend'].forEach((event) => map.on(event, updateAnchor));
