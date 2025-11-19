@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', () => {
             pitch: isNaN(parseFloat(pitch)) ? null : parseFloat(pitch),
             roll: isNaN(parseFloat(roll)) ? null : parseFloat(roll)
         };
-        console.log(state);
+        if (debug) console.log(state);
         navigate(state);
     });
     const getTime = offset => `${('0' + new Date(rewind.dataset.time * 1000 + offset * 3600000).getUTCHours()).slice(-2)}:00`;
