@@ -50,6 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAnchor();
     ['moveend', 'dragend', 'zoomend', 'rotateend', 'pitchend'].forEach((event) => map.on(event, updateAnchor));
     const navigate = (state) => {
+        if (debug) console.log(state);
         const eventData = {popstate: true};
         if (!isNaN(state.bearing)) map.setBearing(state.bearing, eventData);
         if (!isNaN(state.pitch)) map.setPitch(state.pitch, eventData);
@@ -61,7 +62,6 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', (e) => {
         const state = e.state;
         if (!state) return;
-        if (debug) console.log(state);
         navigate(state);
     });
     window.addEventListener('hashchange', () => {
@@ -74,7 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
             pitch: parseFloat(pitch),
             roll: parseFloat(roll)
         };
-        if (debug) console.log(state);
         navigate(state);
     });
     const getTime = offset => `${('0' + new Date(rewind.dataset.time * 1000 + offset * 3600000).getUTCHours()).slice(-2)}:00`;
