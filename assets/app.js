@@ -49,8 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('popstate', (e) => {
         const state = e.state;
         if (!state) return;
-        const eventData = {popstate: true};
         if (debug) console.log(state);
+        const eventData = {popstate: true};
         if (!isNaN(state.bearing)) map.setBearing(state.bearing, eventData);
         if (!isNaN(state.pitch)) map.setPitch(state.pitch, eventData);
         if (!isNaN(state.roll)) map.setRoll(state.roll, eventData);
@@ -69,8 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     let playTimeout = setTimeout(setupAnimation, animationStart * 3);
     const oninput = (trigger = true) => {
-        const d = rewind.value === rewind.min && lastVal === '0' ? -1 :
-            rewind.value === '0' && lastVal === rewind.min ? 1 : lastVal - rewind.value;
         const time = new Date(rewind.dataset.time * 1000 +
             rewind.value * 3600000);
         label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
