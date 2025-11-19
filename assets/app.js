@@ -67,12 +67,12 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('hashchange', () => {
         let [lng, lat, zoom, bearing, pitch, roll] = parseHash();
         const state = {
-            lng: isNaN(parseFloat(lng)) ? null : parseFloat(lng),
-            lat: isNaN(parseFloat(lat)) ? null : parseFloat(lat),
-            zoom: isNaN(parseFloat(zoom)) ? null : parseFloat(zoom),
-            bearing: isNaN(parseFloat(bearing)) ? null : parseFloat(bearing),
-            pitch: isNaN(parseFloat(pitch)) ? null : parseFloat(pitch),
-            roll: isNaN(parseFloat(roll)) ? null : parseFloat(roll)
+            lng: parseFloat(lng),
+            lat: parseFloat(lat),
+            zoom: parseFloat(zoom),
+            bearing: parseFloat(bearing),
+            pitch: parseFloat(pitch),
+            roll: parseFloat(roll)
         };
         if (debug) console.log(state);
         navigate(state);
