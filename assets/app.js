@@ -47,9 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     updateAnchor();
     ['moveend', 'dragend', 'zoomend', 'rotateend', 'pitchend'].forEach((event) => map.on(event, updateAnchor));
     window.addEventListener('popstate', (e) => {
-        const eventData = {popstate: true};
         const state = e.state;
         if (!state) return;
+        const eventData = {popstate: true};
         if (debug) console.log(state);
         if (!isNaN(state.bearing)) map.setBearing(state.bearing, eventData);
         if (!isNaN(state.pitch)) map.setPitch(state.pitch, eventData);
