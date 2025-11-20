@@ -66,14 +66,16 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     window.addEventListener('hashchange', () => {
         let [lng, lat, zoom, bearing, pitch, roll] = parseHash();
-        navigate({
+        const values = {
             lng: parseFloat(lng),
             lat: parseFloat(lat),
             zoom: parseFloat(zoom),
             bearing: parseFloat(bearing),
             pitch: parseFloat(pitch),
             roll: parseFloat(roll)
-        });
+        };
+        navigate(values);
+        history.replaceState(values, document.title, window.location.hash);
     });
     const getTime = offset => `${('0' + new Date(rewind.dataset.time * 1000 + offset * 3600000).getUTCHours()).slice(-2)}:00`;
     const setupAnimation = () => {
