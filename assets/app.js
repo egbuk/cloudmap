@@ -109,5 +109,5 @@ document.addEventListener('DOMContentLoaded', () => {
         playTimeout = setTimeout(setupAnimation, animationStart);
     };
     rewind.oninput = oninput;
-    setTimeout(window.location.reload, (rewind.dataset.time*1000+3600000)-new Date().getTime());
+    setTimeout(() => window.location.reload(), (rewind.dataset.time*1000+3600000)-new Date().getTime());
 });
