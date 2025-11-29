@@ -28,13 +28,14 @@ class MapController extends AbstractController
      * @throws Exception
      */
     #[Route('/', methods: ['GET'])]
-    public function map(): Response
+    public function map(Request $request): Response
     {
         $time = $this->tileRepository->getCurrentTime();
         return $this->render('map.html.twig', [
             'time' => (new DateTime($time))->getTimestamp(),
             'display' => $time,
-            'min' => self::MIN
+            'min' => self::MIN,
+            'wallpaper' => $request->get('wallpaper', 0)
         ]);
     }
 
