@@ -78,6 +78,7 @@ document.addEventListener('DOMContentLoaded', () => {
         history.replaceState(values, document.title, window.location.hash);
     });
     const getTime = offset => `${('0' + new Date(rewind.dataset.time * 1000 + offset * 3600000).getUTCHours()).slice(-2)}:00`;
+    let playTimeout;
     const setupAnimation = () => {
         clearInterval(playInterval);
         playInterval = setInterval(() => {
@@ -86,30 +87,30 @@ document.addEventListener('DOMContentLoaded', () => {
             oninput(false);
         }, animationSpeed);
     }
-    if (window.location.search.search('wallpaper=1') === -1) {
-        let playTimeout = setTimeout(setupAnimation, animationStart * 3);
-        const oninput = (trigger = true) => {
-            const time = new Date(rewind.dataset.time * 1000 +
-                rewind.value * 3600000);
-            label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
-            if (lastVal === rewind.value) return;
-            layers.forEach((layer) => {
-                stages.forEach((stage) => {
-                    properties[layer].forEach(property => {
-                        map.setPaintProperty(`${layer}_${stage}_${getTime(rewind.value)}`, property,
-                            map.getPaintProperty(`${layer}_${stage}_${getTime(lastVal)}`, property));
-                        map.setPaintProperty(`${layer}_${stage}_${getTime(lastVal)}`, property, 0);
-                    });
+    const oninput = (trigger = true) => {
+        const time = new Date(rewind.dataset.time * 1000 +
+            rewind.value * 3600000);
+        label.innerText = time.toTimeString().split(':').slice(0, 2).join(':');
+        if (lastVal === rewind.value) return;
+        layers.forEach((layer) => {
+            stages.forEach((stage) => {
+                properties[layer].forEach(property => {
+                    map.setPaintProperty(`${layer}_${stage}_${getTime(rewind.value)}`, property,
+                        map.getPaintProperty(`${layer}_${stage}_${getTime(lastVal)}`, property));
+                    map.setPaintProperty(`${layer}_${stage}_${getTime(lastVal)}`, property, 0);
                 });
             });
-            lastVal = rewind.value;
-            if (trigger === false) return;
-            clearTimeout(playTimeout);
-            clearInterval(playInterval);
-            if (rewind.value !== rewind.min) return;
-            playTimeout = setTimeout(setupAnimation, animationStart);
-        };
-        rewind.oninput = oninput;
+        });
+        lastVal = rewind.value;
+        if (trigger === false) return;
+        clearTimeout(playTimeout);
+        clearInterval(playInterval);
+        if (rewind.value !== rewind.min) return;
+        playTimeout = setTimeout(setupAnimation, animationStart);
+    };
+    rewind.oninput = oninput;
+    if (window.location.search.search('wallpaper=1') === -1) {
+        playTimeout = setTimeout(setupAnimation, animationStart * 3);
     } else {
         setupAnimation();
     }
