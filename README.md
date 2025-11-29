@@ -26,6 +26,13 @@ Live vector cloud map based on live data provided by <https://eumetsat.int>
 * [MapLibre GL](https://maplibre.org)
 * [Redis](https://redis.io)
 
+# Wallpaper mode
+If your desktop environment allows to use web page as a background (for example in KDE using [HTML Wallpaper](https://store.kde.org/p/1324580) plugin), you can add query parameter `?wallpaper=1` to your URL to hide time controls and launch animation immediately. Example:
+
+<https://clouds.heymoon.cc/?wallpaper=1#132.16369401846373;0.282109199965177;3.9276030513952844;0;0;0>
+---
+![Wallpaper](https://heymoon.cc/wallpaper.png)
+
 # Local storage settings
 
 Following settings can be redefined via browser's `localStorage` for testing purposes:
