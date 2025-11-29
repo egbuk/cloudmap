@@ -31,7 +31,7 @@ If your desktop environment allows to use web page as a background (for example 
 
 <https://clouds.heymoon.cc/?wallpaper=1#132.16369401846373;0.282109199965177;3.9276030513952844;0;0;0>
 ---
-![Wallpaper](https://heymoon.cc/wallpaper.png)
+![Wallpaper](wallpaper.png)
 
 # Local storage settings
 

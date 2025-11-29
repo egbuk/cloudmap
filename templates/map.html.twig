@@ -6,4 +6,7 @@
         <label for="rewind">{{ display }}</label>
         <input type="range" min="-{{ min }}" max="0" name="rewind" id="rewind" value="0" data-time="{{ time }}">
     </div>
+    {% if wallpaper %}
+        <div style="position: fixed;top: 0;left: 0;right: 0;bottom: 0;opacity: 0;display: block;cursor: default;"></div>
+    {% endif %}
 {% endblock %}
